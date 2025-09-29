@@ -143,6 +143,67 @@
   flex-direction: column;
   align-items: center;
 }
+/* === Keyboard shortcuts popup styles === */
+.popup-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(20,20,20,0.85);
+  display: none; /* toggled via JS */
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.popup-container {
+  background-color: #2f2b3a;
+  color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 90%;
+  min-width: 320px;
+  overflow-x: auto;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
+
+.popup-container h3 { margin: 0 0 8px 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  margin-bottom: 14px;
+}
+
+td {
+  border: 1px solid #666;
+  padding: 8px;
+  text-align: center;
+  min-width: 80px;
+  color: #ddd;
+}
+
+.key {
+  background: #1c1a24;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: monospace;
+  color: #fff;
+  display: inline-block;
+}
+
+.close-btn {
+  margin-top: 10px;
+  padding: 6px 14px;
+  background-color: #5e5770;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.close-btn:focus { outline: 2px solid #fff; }
 
 
       /* Top panel : #navbar, #toolbar */
@@ -613,8 +674,34 @@ padding-left: 50px;
   <a title="Undo Multiple Paste"><i class="fas fa-undo"></i></a>
   <a onclick="del_sel_regions()" title="Delete Region"><i class="fas fa-trash"></i></a>
   <!-- Info -->
-  <a title="Keyboard Shortcuts"><i class="fas fa-keyboard"></i></a>
+<!-- Info -->
+<a id="toolbar_keyboard_shortcuts"
+   title="Keyboard Shortcuts"
+   onclick="toggleKeyboardPopup()"
+   style="cursor:pointer"
+   aria-haspopup="dialog"
+   aria-controls="keyboard-popup">
+  <i class="fas fa-keyboard"></i>
+</a>
   <a title="Project Info"><i class="fas fa-info-circle"></i></a>
+</div>
+<!-- Keyboard Shortcuts popup -->
+<div id="keyboard-popup" class="popup-backdrop" style="display:none;">
+  <div class="popup-container" role="dialog" aria-modal="true" aria-labelledby="keyboard-popup-title">
+    <h3 id="keyboard-popup-title">Available only on image focus</h3>
+    <table>
+      <tr id="image-focus-keys"></tr>
+      <tr id="image-focus-desc"></tr>
+    </table>
+
+    <h3>Always Available</h3>
+    <table>
+      <tr id="always-keys"></tr>
+      <tr id="always-desc"></tr>
+    </table>
+
+    <button id="keyboard-close" class="close-btn">Close</button>
+  </div>
 </div>
 
 
@@ -624,7 +711,7 @@ padding-left: 50px;
 
 <!-- App Header -->
   <div class="app-header-row">
-    <img src="C:\Users\sowja\Downloads\logo.png" alt="App Logo" class="app-logo">
+    <img src="C:\Users\thanu\Downloads\logo.png" alt="App Logo" class="app-logo">
     <div class="app-title-block">
       <h1 class="app-title">SAMurai</h1>
     </div>
@@ -4744,5 +4831,121 @@ function toggle_img_fn_list_visibility() {
     <script src="./tests/via_test_fileio.js"></script>
     <script src="./tests/via_test_region.js"></script>
      -->
+    <script>
+(function(){
+  // === Your provided shortcuts ===
+  var imageFocusShortcuts = [
+    ['←', '↑', '→', '↓', 'a', 'c', 'v', 'd', 'Ctrl + Wheel', 'l'],
+    [
+      'Move selected region by 1 px (Shift to jump)',
+      'Move selected region by 1 px (Shift to jump)',
+      'Move selected region by 1 px (Shift to jump)',
+      'Move selected region by 1 px (Shift to jump)',
+      'Select all regions',
+      'Copy selected regions',
+      'Paste selected regions',
+      'Delete selected regions',
+      'Zoom in/out (mouse cursor is over image)',
+      'Toggle region label'
+    ]
+  ];
+
+  var alwaysAvailableShortcuts = [
+    ['← →', '+ - =', '↑', '↓', 'Spacebar', 'Home / h', 'End / e', 'PgUp / u', 'PgDown / d', 'Esc'],
+    [
+      'Move to next/previous image',
+      'Zoom in/out/reset',
+      'Update region label',
+      'Update region colour',
+      'Toggle annotation editor (Ctrl to toggle image editor)',
+      'Jump to first image',
+      'Jump to last image',
+      'Jump several images',
+      'Jump several images',
+      'Cancel ongoing task'
+    ]
+  ];
+
+  function populateTable(keysRowId, descRowId, arr) {
+    var keysRow = document.getElementById(keysRowId);
+    var descRow = document.getElementById(descRowId);
+    if (!keysRow || !descRow) return;
+    keysRow.innerHTML = '';
+    descRow.innerHTML = '';
+    var keys = arr[0], desc = arr[1];
+    for (var i = 0; i < keys.length; ++i) {
+      var tdk = document.createElement('td');
+      var span = document.createElement('span');
+      span.className = 'key';
+      span.textContent = keys[i];
+      tdk.appendChild(span);
+      keysRow.appendChild(tdk);
+
+      var tdd = document.createElement('td');
+      tdd.textContent = desc[i] || '';
+      descRow.appendChild(tdd);
+    }
+  }
+
+  window.toggleKeyboardPopup = function() {
+    var popup = document.getElementById('keyboard-popup');
+    if (!popup) return;
+    if (popup.style.display === 'flex') {
+      closeKeyboardPopup();
+    } else {
+      showKeyboardPopup();
+    }
+  };
+
+  window.showKeyboardPopup = function() {
+    populateTable('image-focus-keys','image-focus-desc', imageFocusShortcuts);
+    populateTable('always-keys','always-desc', alwaysAvailableShortcuts);
+    var popup = document.getElementById('keyboard-popup');
+    popup.style.display = 'flex';
+    var closeBtn = document.getElementById('keyboard-close');
+    if (closeBtn) closeBtn.focus();
+  };
+
+  window.closeKeyboardPopup = function() {
+    var popup = document.getElementById('keyboard-popup');
+    if (!popup) return;
+    popup.style.display = 'none';
+    var icon = document.getElementById('toolbar_keyboard_shortcuts');
+    if (icon) icon.focus();
+  };
+
+  // click outside container closes popup
+  document.addEventListener('click', function(e) {
+    var popup = document.getElementById('keyboard-popup');
+    if (!popup || popup.style.display !== 'flex') return;
+    var container = document.querySelector('#keyboard-popup .popup-container');
+    if (container && !container.contains(e.target) &&
+        !document.getElementById('toolbar_keyboard_shortcuts').contains(e.target)) {
+      closeKeyboardPopup();
+    }
+  });
+
+  // Esc closes popup; Shift+/ (i.e. '?') toggles it as convenience
+  document.addEventListener('keydown', function(e) {
+    var popup = document.getElementById('keyboard-popup');
+    var isOpen = popup && popup.style.display === 'flex';
+    if (e.key === 'Escape' && isOpen) {
+      closeKeyboardPopup();
+    }
+    if ((e.key === '?' || (e.key === '/' && e.shiftKey)) && !isOpen) {
+      e.preventDefault();
+      showKeyboardPopup();
+    }
+  });
+
+  // attach close button once DOM ready
+  window.addEventListener('DOMContentLoaded', function() {
+    var closeBtn = document.getElementById('keyboard-close');
+    if (closeBtn) closeBtn.addEventListener('click', closeKeyboardPopup);
+  });
+})();
+</script>
+
+
   </body>
 </html>
