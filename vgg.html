@@ -51,15 +51,99 @@
       ga('set', 'page', '/via-1.0.0.html');
       ga('send', 'pageview');
     </script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <!-- CSS style definition -->
     <style type="text/css">
+      
+/* === App Header (Logo + Title) === */
+.app-header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;              /* space between logo and text */
+  padding: 0.5em 1em;
+  background-color: #000; /* match top panel color */
+}
+
+.app-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  display: inline-block;
+}
+
+.app-title-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.6rem;
+  color: white;
+  font-weight: 600;
+}
+
+.app-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #d0cbe0; /* subtle contrast */
+}
       body {
       min-width: 800px;
-      padding: 0;
-      margin: 0;
-      font-family: sans-serif;
+  padding: 0;
+  margin: 0;
+  font-family: sans-serif;
+  background-color: #000;   /* full-page black background */
+  color: #fff;
       }
+/* Vertical icon strip */
+#icon_strip {
+  position: fixed;
+  top: 7em; /* below the top panel */
+  left: 0;
+  width: 50px;
+  background-color: #111;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between; 
+  padding-top: 1em;
+  height: calc(100% - 7em);
+  z-index: 20;
+}
+
+#icon_strip a {
+  display: block;
+  margin: 0.5em 0;
+  color: white;
+  font-size: 0.75em;
+  text-decoration: none;
+  text-align: center;
+  transition: transform 0.2s, color 0.2s;
+}
+
+#icon_strip a:hover {
+  color: yellow;
+  transform: scale(1.2);
+}
+#icon_strip a {
+  display: block;
+  margin: 1em 0;
+  color: white;
+  font-size: 0.75em; /* bigger for visibility */
+  text-decoration: none;
+  text-align: center;
+}
+#icon_strip .top-icons,
+#icon_strip .middle-icons,
+#icon_strip .bottom-icons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 
       /* Top panel : #navbar, #toolbar */
       .top_panel {
@@ -125,27 +209,42 @@
       display: block;
       }
 
-      .toolbar {
-      display: inline-block;
-      color: white;
-      vertical-align: top;
-      }
-      .toolbar ul {
-      display: inline;
-      list-style-type: none;
-      overflow: hidden;
-      }
-      .toolbar li {
-      font-size: medium;
-      float: left;
-      padding: 0.65em 0.3em;
-      color: white;
-      }
-      .toolbar li:hover {
-      background-color: #333333;
-      color: red;
-      cursor: pointer;
-      }
+     #icon_strip {
+  position: fixed;
+  top: 7em; /* adjust depending on header height */
+  left: 0;
+  width: 50px;
+  background-color: #111;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* distribute icons evenly */
+  align-items: center;
+  padding: 0.5em 0;
+  height: calc(100% - 7em); /* fills below header */
+  z-index: 20;
+}
+
+#icon_strip a {
+  color: white;
+  font-size: 1em;   /* smaller icons */
+  margin: 0.3em 0;  /* tighter spacing */
+  text-decoration: none;
+  transition: transform 0.2s, color 0.2s;
+}
+
+#icon_strip a:hover {
+  color: yellow;
+  transform: scale(1.2);
+}
+
+#icon_strip .top-icons,
+#icon_strip .middle-icons,
+#icon_strip .bottom-icons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 
       #fileinfo {
       font-size: small;
@@ -164,6 +263,7 @@
       z-index: 1;
       padding: 0;
       top: 3.5em;
+padding-left: 50px;
       /*padding-top: 1.0125em;  ensures the mouse event (x,y) coordinates are integer */
       }
       #leftsidebar {
@@ -210,42 +310,7 @@
       cursor: pointer;
       }
 
-      /* Left sidebar accordion */
-      button.leftsidebar_accordion {
-      font-size: large;
-      background-color: #f2f2f2;
-      cursor: pointer;
-      padding: 0.5em 0.5em;
-      width: 100%;
-      text-align: left;
-      border: 0;
-      outline: none;
-      }
-      button.leftsidebar_accordion:focus {
-      outline: none;
-      }
-      button.leftsidebar_accordion.active, button.leftsidebar_accordion:hover {
-      background-color: #e6e6e6;
-      }
-      button.leftsidebar_accordion:after {
-      content: '\02795';
-      color: #4d4d4d;
-      float: right;
-      }
-      button.leftsidebar_accordion.active:after {
-      content: '\2796';
-      }
-      .leftsidebar_accordion_panel {
-      display: none;
-      padding-top: 0;
-      padding-left: 0.5em;
-      font-size: small;
-      border-right: 2px solid #f2f2f2;
-      border-bottom: 2px solid #f2f2f2;
-      }
-      .leftsidebar_accordion_panel.show {
-      display: block;
-      }
+
 
       /* Region shape selection panel inside leftsidebar */
       ul.region_shape {
@@ -302,9 +367,9 @@
 
       #message_panel {
       position: fixed;
-      left: 0;
+      left: 10%;
       bottom: 0px;
-      line-height: 3em;
+      line-height: 2em;
       width: 100%;
       background-color: #000000;
       color: #ffff00;
@@ -485,6 +550,9 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
       }
+
+
+
     </style>
   </head>
 
@@ -523,8 +591,44 @@
       </defs>
     </svg>
 
+
+
+   <!-- Left vertical icon strip -->
+<div id="icon_strip">
+
+  <!-- Navigation -->
+  <a id="toolbar_prev_img" onclick="move_to_prev_image()" title="Previous Image"><i class="fas fa-arrow-left"></i></a>
+  <a id="toolbar_next_img" onclick="move_to_next_image()" title="Next Image"><i class="fas fa-arrow-right"></i></a>
+  <!-- Zoom -->
+  <a id="toolbar_zoom_out" onclick="zoom_out()" title="Zoom Out"><i class="fas fa-search-minus"></i></a>
+  <a id="toolbar_zoom_in" onclick="zoom_in()" title="Zoom In"><i class="fas fa-search-plus"></i></a>
+  <a id="toolbar_zoom_reset" onclick="reset_zoom_level()" title="Reset Zoom"><i class="fas fa-expand"></i></a>
+  <!-- Editing Tools -->
+  <a title="Grid View"><i class="fas fa-th"></i></a>
+  <a title="Toggle Annotation Editor"><i class="fas fa-edit"></i></a>
+  <a onclick="sel_all_regions()" title="Select All Regions"><i class="fas fa-check-square"></i></a>
+  <a onclick="copy_sel_regions()" title="Copy Regions"><i class="fas fa-copy"></i></a>
+  <a onclick="paste_sel_regions()" title="Paste Regions"><i class="fas fa-paste"></i></a>
+  <a title="Paste Multiple Images"><i class="fas fa-clone"></i></a>
+  <a title="Undo Multiple Paste"><i class="fas fa-undo"></i></a>
+  <a onclick="del_sel_regions()" title="Delete Region"><i class="fas fa-trash"></i></a>
+  <!-- Info -->
+  <a title="Keyboard Shortcuts"><i class="fas fa-keyboard"></i></a>
+  <a title="Project Info"><i class="fas fa-info-circle"></i></a>
+</div>
+
+
+
     <div class="top_panel" id="ui_top_panel">
       <!-- Navigation menu -->
+
+<!-- App Header -->
+  <div class="app-header-row">
+    <img src="C:\Users\sowja\Downloads\logo.png" alt="App Logo" class="app-logo">
+    <div class="app-title-block">
+      <h1 class="app-title">SAMurai</h1>
+    </div>
+  </div>
       <div class="navbar">
         <ul>
           <li><a onclick="show_home_panel()" title="Home">Home</a></li>
@@ -560,105 +664,14 @@
 
       </div> <!-- end of #navbar -->
 
-      <!-- Shortcut toolbar -->
-      <div class="toolbar">
-        <ul>
-          <!--
-          <li onclick="sel_local_images()" title="Load or Add Images">&ctdot;</li>
-          <li onclick="sel_local_data_file('annotations')" title="Import Annotations">&uarr;</li>
-          <li onclick="download_all_region_data('csv')" title="Save Annotations (as CSV)">&DownArrowBar;</li>
-          -->
+    
 
-          <li id="toolbar_prev_img" style="margin-left: 1em;" onclick="move_to_prev_image()" title="Previous Image">&larr;</li>
-          <li id="toolbar_next_img" onclick="move_to_next_image()" title="Next Image">&rarr;</li>
-          <li id="toolbar_list_img" onclick="toggle_img_list()" title="List Images">&#9776;</li>
-
-          <li id="toolbar_zoom_out" style="margin-left: 2em;" onclick="zoom_out()" title="Zoom Out">&minus;</li>
-          <li id="toolbar_zoom_in" onclick="zoom_in()" title="Zoom In">&plus;</li>
-          <li id="toolbar_zoom_reset" onclick="reset_zoom_level()" title="Zoom Reset">&equals;</li>
-
-          <li id="toolbar_copy_region" style="margin-left: 2em;" onclick="copy_sel_regions()" title="Copy Region">c</li>
-          <li id="toolbar_paste_region" onclick="paste_sel_regions()" title="Paste Region">v</li>
-          <li id="toolbar_sel_all_region" onclick="sel_all_regions()" title="Select All Regions">a</li>
-          <li id="toolbar_del_region" onclick="del_sel_regions()" title="Delete Region">&times;</li>
-        </ul>
-      </div> <!-- endof #toolbar -->
       <input type="file" id="invisible_file_input" multiple name="files[]" style="display:none">
     </div> <!-- endof #top_panel -->
 
     <!-- Middle Panel contains a left-sidebar and image display areas -->
     <div class="middle_panel">
-      <div id="leftsidebar">
-        <button class="leftsidebar_accordion active">Region Shape</button>
-        <div class="leftsidebar_accordion_panel show">
-          <ul class="region_shape">
-            <li id="region_shape_rect" class="selected" onclick="select_region_shape('rect')" title="Rectangle"><svg height="32" viewbox="0 0 32 32"><use xlink:href="#shape_rectangle"></use></svg></li>
-            <li id="region_shape_circle" onclick="select_region_shape('circle')" title="Circle"><svg height="32" viewbox="0 0 32 32"><use xlink:href="#shape_circle"></use></svg></li>
-            <li id="region_shape_ellipse" onclick="select_region_shape('ellipse')" title="Ellipse"><svg height="32" viewbox="0 0 32 32"><use xlink:href="#shape_ellipse"></use></svg></li>
-            <li id="region_shape_polygon" onclick="select_region_shape('polygon')" title="Polygon"><svg height="32" viewbox="0 0 32 32"><use xlink:href="#shape_polygon"></use></svg></li>
-            <li id="region_shape_point" onclick="select_region_shape('point')" title="Point"><svg height="32" viewbox="0 0 32 32"><use xlink:href="#shape_point"></use></svg></li>
-            <li id="region_shape_polyline" onclick="select_region_shape('polyline')" title="Polyline"><svg height="32" viewbox="0 0 32 32"><use xlink:href="#shape_polyline"></use></svg></li>
-          </ul>
-        </div>
-
-        <button class="leftsidebar_accordion active" id="loaded_img_panel_title">Loaded Images</button>
-        <div class="leftsidebar_accordion_panel show" id="img_fn_list_panel">
-          <div>
-            <input type="text" placeholder="Filter using regular expression" oninput="img_fn_list_onregex()" id="img_fn_list_regex">
-          </div>
-          <div id="img_fn_list"></div>
-        </div>
-
-        <button onclick="toggle_reg_attr_panel()" class="leftsidebar_accordion" id="reg_attr_panel_button">Region Attributes</button>
-        <button onclick="toggle_file_attr_panel()" class="leftsidebar_accordion" id="file_attr_panel_button">File Attributes</button>
-
-        <button class="leftsidebar_accordion">Keyboard Shortcuts</button>
-        <div class="leftsidebar_accordion_panel">
-          <table style="padding: 2em 0em;">
-            <tr>
-              <td style="width: 6em;">n/p (&larr;/&rarr;)</td>
-              <td>Next/Previous image</td>
-            </tr>
-            <tr>
-              <td>+&nbsp;/&nbsp;-&nbsp;/&nbsp;=</td>
-              <td>Zoom in/out/reset</td>
-            </tr>
-            <tr>
-              <td>Ctrl + c</td>
-              <td>Copy sel. regions</td>
-            </tr>
-            <tr>
-              <td>Ctrl + v</td>
-              <td>Paste sel. regions</td>
-            </tr>
-            <tr>
-              <td>Ctrl + a</td>
-              <td>Select all regions</td>
-            </tr>
-            <tr>
-              <td>Del, Bkspc</td>
-              <td>Delete image region</td>
-            </tr>
-            <tr>
-              <td>Esc</td>
-              <td>Cancel operation</td>
-            </tr>
-            <tr>
-              <td>Ctrl + s</td>
-              <td>Download annotations</td>
-            </tr>
-            <tr>
-              <td>Spacebar</td>
-              <td>Toggle image list</td>
-            </tr>
-          </table>
-        </div>
-
-      </div> <!-- end of leftsidebar -->
-      <div id="leftsidebar_collapse_panel">
-        <div onclick="toggle_leftsidebar()" id="leftsidebar_collapse_button" title="Show/hide left toolbar">
-          &ltrif;</div>
-      </div>
+     
 
       <!-- Main display area: contains image canvas, ... -->
       <div id="display_area">
