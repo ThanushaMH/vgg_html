@@ -207,6 +207,196 @@ td {
 }
 .close-btn:focus { outline: 2px solid #fff; }
 
+/* === Right-side file filter panel === */
+.filter-panel {
+  position: fixed;
+  top: 100px;
+  right: 0;
+  width: 250px;
+  height: 400px;
+  background-color: #1f1f2e;
+  color: white;
+  border-left: 1px solid #444;
+  padding: 10px;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.filter-panel.collapsed {
+  transform: translateX(100%);
+}
+
+.filter-panel .toggle-btn {
+  position: absolute;
+  left: -30px;
+  top: 20px;
+  width: 30px;
+  height: 30px;
+  background-color: #29293d;
+  border: none;
+  border-radius: 5px 0 0 5px;
+  color: white;
+  cursor: pointer;
+  box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.filter-panel .filter-content {
+  margin-top: 40px;
+}
+
+.filter-panel .form-select {
+  width: 100%;
+  background-color: #29293d;
+  color: white;
+  border: 1px solid #555;
+}
+
+.filter-panel .file-list {
+  margin-top: 10px;
+  max-height: 250px;
+  overflow-y: auto;
+  background-color: #12121b;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #444;
+}
+
+.filter-panel .file-item {
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid #333;
+}
+
+.filter-panel .file-item:hover {
+  background-color: #444;
+}
+
+.filter-panel .file-item.selected {
+  background-color: #666;
+  font-weight: bold;
+}
+/* Modal overlay */
+    .modal {
+      display: none;
+      position: relative;
+      z-index: 20000;
+      top: 0; left: 0;
+      width: auto; height: auto;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+     /* align-items: center;*/
+    }
+
+    /* Modal box (fullscreen width) */
+    .modal-content {
+      background: #181818;
+      color: #f0f0f0;
+      border-radius: 0;
+      width: 100%;
+      height: 95%;         /* nearly full height */
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .modal-header {
+      background: #202020;
+      color: #fff;
+      border-bottom: 1px solid #333;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header .modal-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+    .modal-header .btn-close {
+      filter: invert(1) brightness(200%);
+      cursor: pointer;
+      font-size: 22px;
+    }
+
+    /* Body */
+    .modal-body {
+      flex: 1;
+      padding: 20px;
+      background: #181818;
+      overflow-y: auto;
+    }
+
+    /* Horizontal form rows */
+    .form-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      flex: 0 0 200px; /* fixed label width */
+      margin: 0;
+      font-weight: 600;
+      color: #ccc;
+    }
+    .form-group .form-control {
+      flex: 1;
+      background: #000 !important;   /* pure black */
+      border: 1px solid #444 !important;
+      color: #eee !important;
+      border-radius: 6px;
+      padding: 10px;
+    }
+    .form-group .form-control:focus {
+      border-color: #007bff;
+      background: #111;
+      color: #fff;
+      box-shadow: 0 0 6px rgba(0,123,255,0.4);
+      outline: none;
+    }
+
+    /* Table */
+    .table-container { max-height: 300px; overflow-y: auto;  }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .table th, .table td {
+      border: 1px solid #333;
+      padding: 10px;
+      text-align: left;
+    }
+    .table th {
+      background: #2a2a2a;
+      color: #bbb;
+    }
+    .table td { background: #252525; color: #ddd; }
+    .table-hover tbody tr:hover { background: #333; cursor: pointer; }
+    .table-active { background: rgba(0,123,255,0.25) !important; }
+
+    /* Footer */
+    .modal-footer {
+      background: #202020;
+      border-top: 1px solid #333;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-footer small { color: #aaa; }
+    .modal-footer button {
+      border: none;
+      font-weight: 600;
+      padding: 8px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+    .modal-footer .btn-success { background: #28a745; color: #fff; }
+    .modal-footer .btn-danger { background: #dc3545; color: #fff; }
+    .modal-footer .btn-secondary { background: #6c757d; color: #fff; }
+    .modal-footer button:hover { opacity: 0.9; }
 
       /* Top panel : #navbar, #toolbar */
       .top_panel {
@@ -717,8 +907,8 @@ td {
     </style>
   </head>
 
-  <body onload="_via_init()" onresize="_via_update_ui_components()">
-    <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <body onload="_via_init(); openCreateModal();" onresize="_via_update_ui_components()">
+    <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" ...></svg>    <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
       <defs>
         <symbol id="shape_rectangle">
           <title>Rectangular region shape</title>
@@ -813,7 +1003,11 @@ td {
 
 <!-- App Header -->
   <div class="app-header-row">
+<<<<<<< Updated upstream
     <img src="C:\Users\Sankarshana\Downloads\logo.png" alt="App Logo" class="app-logo">
+=======
+    <img src="C:\Users\thanu\Downloads\logo.png" alt="App Logo" class="app-logo">
+>>>>>>> Stashed changes
     <div class="app-title-block">
       <h1 class="app-title">SAMurai</h1>
     </div>
@@ -857,6 +1051,83 @@ td {
 
       <input type="file" id="invisible_file_input" multiple name="files[]" style="display:none">
     </div> <!-- endof #top_panel -->
+<!-- === Right-side File Filter Panel === -->
+<div id="file-filter-panel" class="filter-panel collapsed">
+  <button id="toggle-filter-panel" class="toggle-btn">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+
+  <div class="filter-content">
+    <select id="filter-select" class="form-select mb-2">
+      <option>All files</option>
+      <option>Show files without regions</option>
+      <option>Show files missing region annotations</option>
+      <option>Show files missing file annotations</option>
+      <option>Files that could not be loaded</option>
+      <option>Regular expressions</option>
+      <option>Filter by region attribute</option>
+    </select>
+
+    <!-- Uploaded files list -->
+    <div id="file-list" class="file-list"></div>
+  </div>
+</div>
+
+
+<!-- Create Project Modal -->
+
+<div id="createProjectModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeCreateModal()">&times;</span>
+    <h2>Create New / Load Project</h2>
+
+    <div class="form-group">
+      <label for="projName">Project Name</label>
+      <input type="text" id="projName" oninput="filterProjects()" />
+    </div>
+
+    <div class="form-group">
+      <label for="projDesc">Project Description</label>
+      <textarea id="projDesc" rows="3" oninput="filterProjects()"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="createdBy">Created By</label>
+      <input type="text" id="createdBy" oninput="filterProjects()" />
+    </div>
+
+    <div class="form-group">
+      <label for="createdOn">Created On</label>
+      <input type="text" id="createdOn" disabled />
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Project Name</th>
+            <th>Description</th>
+            <th>Created By</th>
+            <th>Created On</th>
+            <th># Images</th>
+          </tr>
+        </thead>
+        <tbody id="projectTable"></tbody>
+      </table>
+    </div>
+
+    <div class="modal-footer">
+      <small id="modeLabel">Mode: Create New Project</small>
+      <div>
+        <button onclick="submitProject()" id="submitBtn">Create New Project</button>
+        <button onclick="closeCreateModal()">Cancel</button>
+        <button onclick="createTemporaryProject()">Create Temporary Project</button>
+      </div>
+    </div>
+  </div>
+</div>
+  </head>
+
+
 
     <!-- Middle Panel contains a left-sidebar and image display areas -->
     <div class="middle_panel">
@@ -5126,7 +5397,138 @@ window.onclick = function(event) {
   });
 })();
 </script>
+<script>
+window.addEventListener("load", () => {
+  const filterPanel = document.getElementById("file-filter-panel");
+  const toggleBtn = document.getElementById("toggle-filter-panel");
+  const fileList = document.getElementById("file-list");
 
+  // Collapse/Expand
+  toggleBtn.addEventListener("click", () => {
+    filterPanel.classList.toggle("collapsed");
+    const icon = toggleBtn.querySelector("i");
+    icon.className = filterPanel.classList.contains("collapsed")
+      ? "fas fa-chevron-right"
+      : "fas fa-chevron-left";
+  });
 
+  // Hook into VIA’s existing upload process
+  const origStoreLocalImgRef = window.store_local_img_ref;
+  window.store_local_img_ref = function(event) {
+    // Call original VIA logic first
+    origStoreLocalImgRef.call(this, event);
+
+    // Then update our right-side file list
+    const files = event.target.files;
+    for (let i = 0; i < files.length; i++) {
+      const fileName = files[i].name;
+
+      // Skip duplicates
+      if (![...fileList.children].some(item => item.textContent === fileName)) {
+        const div = document.createElement("div");
+        div.className = "file-item";
+        div.textContent = fileName;
+
+        // Select on click
+        div.addEventListener("click", () => {
+          document.querySelectorAll("#file-list .file-item")
+            .forEach(el => el.classList.remove("selected"));
+          div.classList.add("selected");
+        });
+
+        fileList.appendChild(div);
+      }
+    }
+  };
+});
+</script>
+
+<script>
+  let projects = [
+    {id: 1, name: "Demo A", desc: "Sample project A", by: "Alice", on: "2025-09-30", images: 5},
+    {id: 2, name: "Demo B", desc: "Sample project B", by: "Bob", on: "2025-09-29", images: 3}
+  ];
+  let selectedId = null;
+  let mode = "create";
+
+  function openCreateModal() {
+    document.getElementById("createProjectModal").style.display = "block";
+    document.getElementById("createdOn").value = new Date().toUTCString();
+    renderTable(projects);
+  }
+  function closeCreateModal() {
+    document.getElementById("createProjectModal").style.display = "none";
+  }
+
+  function renderTable(data) {
+    const tbody = document.getElementById("projectTable");
+    tbody.innerHTML = "";
+    data.forEach(p => {
+      const row = document.createElement("tr");
+      if (selectedId === p.id) row.classList.add("table-active");
+      row.innerHTML = `
+        <td>${p.name}</td>
+        <td>${p.desc}</td>
+        <td>${p.by}</td>
+        <td>${p.on}</td>
+        <td>${p.images}</td>
+      `;
+      row.onclick = () => selectProject(p);
+      tbody.appendChild(row);
+    });
+  }
+
+  function filterProjects() {
+    const name = document.getElementById("projName").value.toLowerCase();
+    const desc = document.getElementById("projDesc").value.toLowerCase();
+    const by = document.getElementById("createdBy").value.toLowerCase();
+    const filtered = projects.filter(p =>
+      p.name.toLowerCase().includes(name) &&
+      p.desc.toLowerCase().includes(desc) &&
+      p.by.toLowerCase().includes(by)
+    );
+    renderTable(filtered);
+    if (filtered.length === 1 && filtered[0].name.toLowerCase() === name) {
+      mode = "load";
+      selectedId = filtered[0].id;
+    } else {
+      mode = "create";
+      selectedId = null;
+    }
+    updateFooter();
+  }
+
+  function selectProject(p) {
+    selectedId = p.id;
+    document.getElementById("projName").value = p.name;
+    document.getElementById("projDesc").value = p.desc;
+    document.getElementById("createdBy").value = p.by;
+    document.getElementById("createdOn").value = p.on;
+    mode = "load";
+    updateFooter();
+    renderTable(projects);
+  }
+
+  function updateFooter() {
+    document.getElementById("modeLabel").innerText =
+      "Mode: " + (mode === "create" ? "Create New Project" : "Load Existing Project");
+    document.getElementById("submitBtn").innerText =
+      mode === "create" ? "Create New Project" : "Load Existing Project";
+  }
+
+  function submitProject() {
+    if (mode === "create") {
+      alert("Project created: " + document.getElementById("projName").value);
+    } else {
+      alert("Project loaded: " + document.getElementById("projName").value);
+    }
+    closeCreateModal();
+  }
+
+  function createTemporaryProject() {
+    alert("Temporary project created.");
+    closeCreateModal();
+  }
+</script>
   </body>
 </html>
