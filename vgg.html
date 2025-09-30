@@ -313,6 +313,34 @@ td {
   align-items: center;
 }
 
+      #toolbar_prev_img,
+#toolbar_next_img {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.5);
+  display:none;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5em;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  z-index: 50; /* ensure on top of canvas */
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+#toolbar_prev_img:hover, #toolbar_next_img:hover {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.2);
+}
+
+#toolbar_prev_img {
+  left: 7px;  /* distance from left edge */
+}
+
+#toolbar_next_img {
+  right: 7px; /* distance from right edge */
+}
 
       #fileinfo {
       font-size: small;
@@ -729,9 +757,7 @@ td {
    <!-- Left vertical icon strip -->
 <div id="icon_strip">
 
-  <!-- Navigation -->
-  <a id="toolbar_prev_img" onclick="move_to_prev_image()" title="Previous Image"><i class="fas fa-arrow-left"></i></a>
-  <a id="toolbar_next_img" onclick="move_to_next_image()" title="Next Image"><i class="fas fa-arrow-right"></i></a>
+  
   <!-- Zoom -->
   <a id="toolbar_zoom_out" onclick="zoom_out()" title="Zoom Out"><i class="fas fa-search-minus"></i></a>
   <a id="toolbar_zoom_in" onclick="zoom_in()" title="Zoom In"><i class="fas fa-search-plus"></i></a>
@@ -787,7 +813,7 @@ td {
 
 <!-- App Header -->
   <div class="app-header-row">
-    <img src="C:\Users\sowja\Downloads\logo.png" alt="App Logo" class="app-logo">
+    <img src="C:\Users\Sankarshana\Downloads\logo.png" alt="App Logo" class="app-logo">
     <div class="app-title-block">
       <h1 class="app-title">SAMurai</h1>
     </div>
@@ -838,11 +864,16 @@ td {
 
       <!-- Main display area: contains image canvas, ... -->
       <!--<div id="display_area">-->
+        
         <div id="canvas_panel">
+          <a id="toolbar_prev_img" onclick="move_to_prev_image()" title="Previous Image"><i class="fas fa-arrow-left"></i></a>
+        <a id="toolbar_next_img" onclick="move_to_next_image()" title="Next Image"><i class="fas fa-arrow-right"></i></a>
           <canvas id="image_canvas"></canvas>
           <canvas id="region_canvas" tabindex="1">Sorry, your browser does not support HTML5 Canvas functionality which is required for this application.</canvas>
+          <!-- Navigation -->
+        
         </div>
-
+        
         <div>
           <div class="text_panel" id="via_start_info_panel">Starting VGG Image Annotator ...</div>
 
@@ -1912,6 +1943,20 @@ function show_image(image_index) {
       // update the current state of application
       _via_image_id = img_id;
       _via_image_index = image_index;
+      // Hide prev arrow if first image
+if (_via_image_index <= 0) {
+  document.getElementById('toolbar_prev_img').style.display = 'none';
+} else {
+  document.getElementById('toolbar_prev_img').style.display = 'block';
+}
+
+// Hide next arrow if last image
+if (_via_image_index >= _via_image_id_list.length - 1) {
+  document.getElementById('toolbar_next_img').style.display = 'none';
+} else {
+  document.getElementById('toolbar_next_img').style.display = 'block';
+}
+      
       _via_current_image_filename = img_filename;
       _via_current_image_loaded = true;
       _via_is_loading_current_image = false;
@@ -1927,6 +1972,7 @@ function show_image(image_index) {
       _via_current_image_width = _via_current_image.naturalWidth;
       _via_current_image_height = _via_current_image.naturalHeight;
 
+      
       // set the size of canvas
       // based on the current dimension of browser window
       var de = document.documentElement;
@@ -1985,6 +2031,11 @@ function show_image(image_index) {
     // load image from base64 data or URL
     img_reader.readAsText( new Blob([_via_img_metadata[img_id].base64_img_data]) );
   }
+
+  // Show navigation arrows once an image is loaded
+document.getElementById('canvas_prev_img').style.display = 'block';
+document.getElementById('canvas_next_img').style.display = 'block';
+
 }
 
 // transform regions in image space to canvas space
