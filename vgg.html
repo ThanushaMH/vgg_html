@@ -612,6 +612,68 @@ padding-left: 50px;
       100% { transform: rotate(360deg); }
       }
 
+/* Overlay */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 20000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+}
+
+/* Modal Box */
+.modal-content {
+  background: #1f1f1f;
+  margin: 8% auto;
+  padding: 20px;
+  border-radius: 6px;
+  width: 420px;
+  color: white;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+}
+
+/* Title */
+.modal-content h2 {
+  margin-top: 0;
+  font-size: 1.3em;
+  border-bottom: 1px solid #444;
+  padding-bottom: 8px;
+}
+
+/* Table styling */
+.modal-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.modal-content th {
+  text-align: left;
+  color: #aaa;
+  width: 40%;
+  padding: 6px 4px;
+}
+
+.modal-content td {
+  padding: 6px 4px;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* Close button */
+.modal-content .close {
+  float: right;
+  font-size: 22px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.modal-content .close:hover {
+  color: #fff;
+}
 
 
     </style>
@@ -683,7 +745,11 @@ padding-left: 50px;
    aria-controls="keyboard-popup">
   <i class="fas fa-keyboard"></i>
 </a>
-  <a title="Project Info"><i class="fas fa-info-circle"></i></a>
+  <a title="Project Info" onclick="openInfoModal()">
+  <i class="fas fa-info-circle"></i>
+</a>
+
+
 </div>
 <!-- Keyboard Shortcuts popup -->
 <div id="keyboard-popup" class="popup-backdrop" style="display:none;">
@@ -711,7 +777,7 @@ padding-left: 50px;
 
 <!-- App Header -->
   <div class="app-header-row">
-    <img src="C:\Users\thanu\Downloads\logo.png" alt="App Logo" class="app-logo">
+    <img src="C:\Users\sowja\Downloads\logo.png" alt="App Logo" class="app-logo">
     <div class="app-title-block">
       <h1 class="app-title">SAMurai</h1>
     </div>
@@ -862,6 +928,24 @@ padding-left: 50px;
     <!-- this vertical spacer is needed to allow scrollbar to show
          items like Keyboard Shortcut hidden under the attributes panel -->
     <div style="width: 100%;" id="vertical_space"></div>
+
+<!-- Info Popup -->
+<div id="infoModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeInfoModal()">&times;</span>
+    <h2>Project Information</h2>
+    <table>
+      <tr><th>Name:</th><td id="project-name">Untitled</td></tr>
+      <tr><th>Description:</th><td id="project-description"></td></tr>
+      <tr><th>Created By:</th><td id="project-createdby">SAMurai</td></tr>
+      <tr><th>Created On:</th><td id="project-createdon">-</td></tr>
+      <tr><th>Status:</th><td id="project-status">Temporary</td></tr>
+      <tr><th>ID:</th><td id="project-id">Not saved</td></tr>
+    </table>
+  </div>
+</div>
+
+
 
     <script type="text/javascript">
       //<!--AUTO_INSERT_VIA_DEMO_JS_HERE-->
@@ -4804,6 +4888,43 @@ function toggle_img_fn_list_visibility() {
   document.getElementById('img_fn_list_panel').classList.toggle('show');
   document.getElementById('loaded_img_panel_title').classList.toggle('active');
 }
+
+
+// Store project details (default values)
+var currentProject = {
+  name: "Untitled",
+  description: "",
+  createdBy: "SAMurai",
+  createdOn: new Date().toUTCString(),   // auto-generate timestamp
+  status: "Temporary",
+  id: "Not saved"
+};
+
+function openInfoModal() {
+  // Fill modal fields with currentProject data
+  document.getElementById("project-name").innerText = currentProject.name;
+  document.getElementById("project-description").innerText = currentProject.description;
+  document.getElementById("project-createdby").innerText = currentProject.createdBy;
+  document.getElementById("project-createdon").innerText = currentProject.createdOn;
+  document.getElementById("project-status").innerText = currentProject.status;
+  document.getElementById("project-id").innerText = currentProject.id;
+
+  document.getElementById("infoModal").style.display = "block";
+}
+
+function closeInfoModal() {
+  document.getElementById("infoModal").style.display = "none";
+}
+
+// Optional: close modal when clicking outside
+window.onclick = function(event) {
+  var modal = document.getElementById("infoModal");
+  if (event.target == modal) {
+    closeInfoModal();
+  }
+};
+
+
 
 //
 // hooks for sub-modules
