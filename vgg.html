@@ -63,6 +63,7 @@
   gap: 12px;              /* space between logo and text */
   padding: 0.5em 1em;
   background-color: #000; /* match top panel color */
+  border-bottom: 1.5px solid whitesmoke;
 }
 
 .app-logo {
@@ -92,10 +93,11 @@
 }
       body {
       min-width: 800px;
+      
   padding: 0;
   margin: 0;
   font-family: sans-serif;
-  background-color: #000;   /* full-page black background */
+  background-color: black;   /* full-page black background */
   color: #fff;
       }
 /* Vertical icon strip */
@@ -223,11 +225,15 @@ td {
 
       .navbar {
       display: inline-block;
+      border-bottom: 1.5px solid whitesmoke;
+      width:100%;
       }
       .navbar ul {
-      display: inline;
+      display: flex;
       list-style-type: none;
       overflow: hidden;
+      padding: 0;
+      margin: 0;
       }
       .navbar li {
       float: left;
@@ -235,8 +241,9 @@ td {
       .navbar li a, .drop_menu_item {
       display: inline-block;
       color: white;
-      padding: 0.65em 1.2em;
+      padding: 0.80em 1.2em;
       text-decoration: none;
+      
       }
       .navbar li a:hover, .dropdown:hover {
       background-color: #999999;
@@ -316,36 +323,39 @@ td {
       }
 
       /* Middle panel: containing #image_panel, #leftsidebar */
-      .middle_panel {
-      position: relative;
-      display: table;
-      table-layout: fixed;
-      width: 100%;
-      z-index: 1;
-      padding: 0;
-      top: 3.5em;
-padding-left: 50px;
-      /*padding-top: 1.0125em;  ensures the mouse event (x,y) coordinates are integer */
-      }
-      #leftsidebar {
+     .middle_panel {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  /* Start below top panel (approx 3.5em high) */
+  margin-top: 3.5em;
+  height: calc(100vh - 3.5em); /* full height minus navbar */
+  padding-left: 50px;          /* leave space for sidebar */
+  box-sizing: border-box;
+}
+
+#leftsidebar {
       display: table-cell;
       width: 250px;
       z-index: 10;
       vertical-align: top;
       }
-      #display_area {
-      display: table-cell;
-      width: 100%;
-      z-index: 1;
-      margin: 0;
-      padding-left: 1em;
-      vertical-align: top;
-      }
-      #canvas_panel {
-      position: relative;
-      margin: 0;
-      padding: 0;
-      }
+#display_area {
+  flex: 1;                     
+  display: flex;
+  justify-content: center;     /* horizontal center */
+  align-items: center;         /* vertical center */
+}
+
+#canvas_panel {
+  position: relative;
+  display: inline-block;
+  margin: auto;
+}
+
+
       #canvas_panel canvas:focus {
       outline: none;
       }
@@ -827,7 +837,7 @@ padding-left: 50px;
      
 
       <!-- Main display area: contains image canvas, ... -->
-      <div id="display_area">
+      <!--<div id="display_area">-->
         <div id="canvas_panel">
           <canvas id="image_canvas"></canvas>
           <canvas id="region_canvas" tabindex="1">Sorry, your browser does not support HTML5 Canvas functionality which is required for this application.</canvas>
@@ -911,7 +921,6 @@ padding-left: 50px;
           </div>
 
         </div>
-      </div>
     </div>
 
     <!-- region and file attributes input panel -->
@@ -1193,7 +1202,7 @@ function _via_init() {
 //
 // Handlers for top navigation bar
 //
-function show_home_panel() {
+/*function show_home_panel() {
   if (_via_current_image_loaded) {
     show_all_canvas();
     set_all_text_panel_display('none');
@@ -1203,7 +1212,7 @@ function show_home_panel() {
     document.getElementById('via_start_info_panel').innerHTML = start_info;
     document.getElementById('via_start_info_panel').style.display = 'block';
   }
-}
+}*/
 function sel_local_images() {
   // source: https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications
   if (invisible_file_input) {
