@@ -93,7 +93,6 @@
 }
       body {
       min-width: 800px;
-      
   padding: 0;
   margin: 0;
   font-family: sans-serif;
@@ -114,6 +113,7 @@
   padding-top: 1em;
   height: calc(100% - 7em);
   z-index: 20;
+  border-right: 1px solid #333;
 }
 
 #icon_strip a {
@@ -402,7 +402,7 @@ td {
       .top_panel {
       position: fixed;
       top: 0;
-      left: 0;
+      left: 50px;
       display: block;
       font-size: medium;
       background-color: #000000;
@@ -417,6 +417,7 @@ td {
       display: inline-block;
       border-bottom: 1.5px solid whitesmoke;
       width:100%;
+      left: px;
       }
       .navbar ul {
       display: flex;
@@ -903,6 +904,34 @@ td {
   color: #fff;
 }
 
+.ribbon-bar {
+  display: none;              /* hidden by default */
+  background: #2f2b3a;
+  padding: 6px 12px;
+  border-top: 1px solid #444;
+  gap: 10px;
+}
+
+.ribbon-bar button {
+  background: #3c374a;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.ribbon-bar button:hover {
+  background: #56506d;
+}
+
+.ribbon-bar button.selected {
+  background: #5b4b8a;   /* purple highlight */
+  border: 1px solid #9a85d6;
+  box-shadow: 0px 0px 6px rgba(154,133,214,0.8);
+  font-weight: bold;
+}
 
     </style>
   </head>
@@ -1013,39 +1042,25 @@ td {
     </div>
   </div>
       <div class="navbar">
+        
         <ul>
-          <li><a onclick="show_home_panel()" title="Home">Home</a></li>
-          <li class="dropdown"><a title="Image" class="drop_menu_item">Image &#9662;</a>
-            <div class="dropdown-content">
-              <a onclick="sel_local_images()" title="Load (or add) a set of images from local disk">Load or Add Images</a>
-              <a onclick="toggle_img_fn_list_visibility()" title="Browse currently loaded images">List Images</a>
-            </div>
-          </li>
-          <li class="dropdown"><a title="Annotations" class="drop_menu_item">Annotation &#9662;</a>
-            <div class="dropdown-content">
-              <a onclick="show_annotation_data()" title="View annotations">View annotations</a>
-              <a onclick="download_all_region_data('csv')" title="Save image region annotations as a CSV(comma separated value) file">Save as CSV</a>
-              <a onclick="download_all_region_data('json')" title="Save image region annotations as a JSON(Javascript Object Notation) file">Save as JSON</a>
-              <a onclick="sel_local_data_file('annotations')" title="Import existing region data from CSV or JSON file">Import</a>
-            </div>
-          </li>
-          <li class="dropdown"><a title="View" class="drop_menu_item">View &#9662;</a>
-            <div class="dropdown-content">
-              <a onclick="toggle_leftsidebar()" title="Show/hide left sidebar">Show/hide left sidebar</a>
-              <a onclick="toggle_region_boundary_visibility()" title="Show or hide region boundaries">Show/hide region boundaries</a>
-              <a onclick="toggle_region_id_visibility()" title="Show or hide region labels">Show/hide region labels</a>
-            </div>
-          </li>
-          <li class="dropdown"><a onclick="show_about_panel()" title="Help">Help &#9662;</a>
-            <div class="dropdown-content">
-              <a onclick="show_getting_started_panel()" title="Getting started with VGG Image Annotator (VIA)">Getting Started</a>
-              <a onclick="show_license_panel()" title="VIA License">License</a>
-              <a onclick="show_about_panel()" title="About VGG Image Annotator (VIA)">About</a>
-            </div>
-          </li>
+          <ul>
+  <!-- <li><a onclick="show_home_panel()" title="Home">Home</a></li> -->
+  <li><a onclick="showRibbon('image')">Image &#9662;</a></li>
+  <li><a onclick="showRibbon('annotation')">Annotation &#9662;</a></li>
+  <li><a onclick="showRibbon('shapes')">Region Shapes &#9662;</a></li>
+  <li><a onclick="showRibbon('attributes')">Attributes &#9662;</a></li>
+  <li><a onclick="showRibbon('help')">Help &#9662;</a></li>
+</ul>
+
         </ul>
 
       </div> <!-- end of #navbar -->
+<!-- Ribbon area -->
+<div id="ribbon_bar" class="ribbon-bar">
+
+
+</div>
 
     
 
@@ -1328,7 +1343,8 @@ var VIA_REGION_SHAPE = { RECT:'rect',
                          ELLIPSE:'ellipse',
                          POLYGON:'polygon',
                          POINT:'point',
-                         POLYLINE:'polyline'
+                         POLYLINE:'polyline',
+                         NONE: -1
                        };
 
 var VIA_REGION_EDGE_TOL           = 20;   // pixel
@@ -1457,6 +1473,38 @@ var BBOX_BOUNDARY_FILL_COLOR_ANNOTATED = "#f2f2f2";
 var BBOX_BOUNDARY_FILL_COLOR_NEW       = "#aaeeff";
 var BBOX_BOUNDARY_LINE_COLOR           = "#1a1a1a";
 var BBOX_SELECTED_FILL_COLOR           = "#ffffff";
+
+
+// Define ribbon contents here
+const RIBBONS = {
+  image: `
+    <button onclick="sel_local_images()">Load or Add Images</button>
+    <button onclick="toggle_img_fn_list_visibility()">List Images</button>
+  `,
+  shapes: `
+    <button onclick="_via_current_shape=VIA_REGION_SHAPE.RECT">Rectangle</button>
+    <button onclick="_via_current_shape=VIA_REGION_SHAPE.CIRCLE">Circle</button>
+    <button onclick="_via_current_shape=VIA_REGION_SHAPE.ELLIPSE">Ellipse</button>
+    <button onclick="_via_current_shape=VIA_REGION_SHAPE.POLYGON">Polygon</button>
+    <button onclick="_via_current_shape=VIA_REGION_SHAPE.POINT">Point</button>
+    <button onclick="_via_current_shape=VIA_REGION_SHAPE.POLYLINE">Polyline</button>
+  `,
+  annotation: `
+    <button onclick="show_annotation_data()">View annotations</button>
+    <button onclick="download_all_region_data('csv')">Save as CSV</button>
+    <button onclick="download_all_region_data('json')">Save as JSON</button>
+    <button onclick="sel_local_data_file('annotations')">Import</button>
+  `,
+  help: `
+    <button onclick="show_getting_started_panel()">Getting Started</button>
+    <button onclick="show_license_panel()">License</button>
+    <button onclick="show_about_panel()">About</button>
+  `,
+  attributes: `
+    <button onclick="toggle_attributes_input_panel('region')">Region Attributes</button>
+    <button onclick="toggle_attributes_input_panel('file')">File Attributes</button>
+  `
+};
 
 //
 // Data structure for annotations
@@ -2377,42 +2425,55 @@ function _via_load_canvas_regions() {
 }
 
 // updates currently selected region shape
+// updates currently selected region shape
 function select_region_shape(sel_shape_name) {
-  for ( var shape_name in VIA_REGION_SHAPE ) {
+  // If the same shape is already active → deselect it
+  if (_via_current_shape === sel_shape_name) {
+    var ui_element = document.getElementById('region_shape_' + _via_current_shape);
+    if (ui_element) ui_element.classList.remove('selected');
+    _via_current_shape = VIA_REGION_SHAPE.NONE;
+    show_message('No shape selected');
+    return;
+  }
+
+  // Otherwise → select the new shape
+  for (var shape_name in VIA_REGION_SHAPE) {
     var ui_element = document.getElementById('region_shape_' + VIA_REGION_SHAPE[shape_name]);
-    ui_element.classList.remove('selected');
+    if (ui_element) ui_element.classList.remove('selected');
   }
 
   _via_current_shape = sel_shape_name;
   var ui_element = document.getElementById('region_shape_' + _via_current_shape);
-  ui_element.classList.add('selected');
+  if (ui_element) ui_element.classList.add('selected');
 
   switch(_via_current_shape) {
-  case VIA_REGION_SHAPE.RECT: // Fall-through
-  case VIA_REGION_SHAPE.CIRCLE: // Fall-through
-  case VIA_REGION_SHAPE.ELLIPSE:
-    show_message('Press single click and drag mouse to draw ' +
-                 _via_current_shape + ' region');
-    break;
+    case VIA_REGION_SHAPE.RECT: // Fall-through
+    case VIA_REGION_SHAPE.CIRCLE: // Fall-through
+    case VIA_REGION_SHAPE.ELLIPSE:
+      show_message('Press single click and drag mouse to draw region');
+      break;
 
-  case VIA_REGION_SHAPE.POLYLINE:
-  case VIA_REGION_SHAPE.POLYGON:
-    _via_is_user_drawing_polygon = false;
-    _via_current_polygon_region_id = -1;
+    case VIA_REGION_SHAPE.POLYLINE:
+    case VIA_REGION_SHAPE.POLYGON:
+      _via_is_user_drawing_polygon = false;
+      _via_current_polygon_region_id = -1;
+      show_message('[Enter] to finish, [Esc] to cancel, [Click] to define vertices');
+      break;
 
-    show_message('[Enter] to finish, [Esc] to cancel, ' +
-                 '[Click] to define polygon/polyline vertices')
-    break;
+    case VIA_REGION_SHAPE.POINT:
+      show_message('Press single click to define points (or landmarks)');
+      break;
 
-  case VIA_REGION_SHAPE.POINT:
-    show_message('Press single click to define points (or landmarks)');
-    break;
+    case VIA_REGION_SHAPE.NONE:
+      show_message('No shape selected');
+      break;
 
-  default:
-    show_message('Unknown shape selected!');
-    break;
+    default:
+      show_message('Unknown shape selected!');
+      break;
   }
 }
+
 
 function set_all_canvas_size(w, h) {
   _via_img_canvas.height = h;
@@ -5254,6 +5315,25 @@ window.onclick = function(event) {
     closeInfoModal();
   }
 };
+
+function showRibbon(type) {
+  const ribbon = document.getElementById("ribbon_bar");
+
+  // If same ribbon is already open, toggle off
+  if (ribbon.style.display === "flex" && ribbon.dataset.type === type) {
+    ribbon.style.display = "none";
+    ribbon.dataset.type = "";
+    return;
+  }
+
+  // Otherwise show selected ribbon
+  ribbon.style.display = "flex";
+  ribbon.dataset.type = type;
+  ribbon.innerHTML = RIBBONS[type] || "<span style='color:gray'>No options available</span>";
+}
+
+
+
 
 
 
