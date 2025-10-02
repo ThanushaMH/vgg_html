@@ -532,6 +532,39 @@ td {
 #toolbar_next_img {
   right: 7px; /* distance from right edge */
 }
+#grid_container img { 
+  display: block; 
+  object-fit: cover; 
+  height: 140px; /* thumbnail height - adjust as you like */ 
+}
+#grid_pagination button {
+  margin: 0 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+#grid_container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 10px;
+}
+
+#grid_container .grid-cell {
+  /*aspect-ratio: 1 / 1;*/
+  background: #111;
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#grid_container .grid-cell img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* preserve aspect ratio inside cell */
+}
+
 
       #fileinfo {
       font-size: small;
@@ -552,6 +585,7 @@ td {
   margin-top: 3.5em;
   height: calc(100vh - 3.5em); /* full height minus navbar */
   padding-left: 50px;          /* leave space for sidebar */
+  padding-top: 90px;
   box-sizing: border-box;
 }
 
@@ -982,7 +1016,7 @@ td {
   <a id="toolbar_zoom_in" onclick="zoom_in()" title="Zoom In"><i class="fas fa-search-plus"></i></a>
   <a id="toolbar_zoom_reset" onclick="reset_zoom_level()" title="Reset Zoom"><i class="fas fa-expand"></i></a>
   <!-- Editing Tools -->
-  <a title="Grid View"><i class="fas fa-th"></i></a>
+<a title="Grid View" onclick="toggle_grid_view()"><i class="fas fa-th"></i></a>
   <a title="Toggle Annotation Editor"><i class="fas fa-edit"></i></a>
   <a onclick="sel_all_regions()" title="Select All Regions"><i class="fas fa-check-square"></i></a>
   <a onclick="copy_sel_regions()" title="Copy Regions"><i class="fas fa-copy"></i></a>
@@ -1032,7 +1066,8 @@ td {
 
 <!-- App Header -->
   <div class="app-header-row">
-    <img src="C:\Users\thanu\Downloads\logo.png" alt="App Logo" class="app-logo">
+
+    <img src="C:\Users\Sankarshana\Downloads\logo.png" alt="App Logo" class="app-logo">
     <div class="app-title-block">
       <h1 class="app-title">SAMurai</h1>
     </div>
@@ -1146,16 +1181,16 @@ td {
 
       <!-- Main display area: contains image canvas, ... -->
       <!--<div id="display_area">-->
-        
+        <a id="toolbar_prev_img" onclick="move_to_prev_image()" title="Previous Image"><i class="fas fa-arrow-left"></i></a>
         <div id="canvas_panel">
-          <a id="toolbar_prev_img" onclick="move_to_prev_image()" title="Previous Image"><i class="fas fa-arrow-left"></i></a>
-        <a id="toolbar_next_img" onclick="move_to_next_image()" title="Next Image"><i class="fas fa-arrow-right"></i></a>
+          
+        
           <canvas id="image_canvas"></canvas>
           <canvas id="region_canvas" tabindex="1">Sorry, your browser does not support HTML5 Canvas functionality which is required for this application.</canvas>
           <!-- Navigation -->
         
         </div>
-        
+        <a id="toolbar_next_img" onclick="move_to_next_image()" title="Next Image"><i class="fas fa-arrow-right"></i></a>
         <div>
           <div class="text_panel" id="via_start_info_panel">Starting VGG Image Annotator ...</div>
 
@@ -1330,6 +1365,9 @@ td {
 */
 
 "use strict";
+var _via_is_grid_view = false;
+var _via_last_single_image_index = -1;
+var _via_grid_page = 0; // pagination index
 
 var VIA_VERSION      = '1.0.7';
 var VIA_NAME         = 'VGG Image Annotator';
@@ -1686,12 +1724,24 @@ function store_local_img_ref(event) {
     }
     show_message(status_msg);
 
-    if ( _via_image_index === -1 ) {
-      show_image(0);
-    } else {
-      show_image( original_image_count );
-    }
-    update_img_fn_list();
+    if (_via_is_grid_view) {
+  // refresh grid only, don’t open single image
+  show_grid_page(_via_grid_page);
+} else {
+  if (_via_image_index === -1) {
+    show_image(0);
+  } else {
+    show_image(original_image_count);
+  }
+}
+update_img_fn_list();
+
+
+if (_via_is_grid_view) {
+  show_grid_page(_via_grid_page); // refresh grid with new images
+}
+
+
   } else {
     show_message("Please upload some image files!");
   }
@@ -2335,6 +2385,63 @@ if (_via_image_index >= _via_image_id_list.length - 1) {
       // refresh the image list
       _via_reload_img_fn_list_table = true;
       update_img_fn_list();
+      function store_local_img_ref(event) {
+  var user_selected_images = event.target.files;
+  var original_image_count = _via_img_count;
+
+  // clear browser cache if user chooses to load new images
+  if (original_image_count === 0) {
+    remove_via_data_from_localStorage();
+  }
+
+  var discarded_file_count = 0;
+  for ( var i = 0; i < user_selected_images.length; ++i ) {
+    var filetype = user_selected_images[i].type.substr(0, 5);
+    if ( filetype === 'image' ) {
+      var filename = user_selected_images[i].name;
+      var size     = user_selected_images[i].size;
+      var img_id   = _via_get_image_id(filename, size);
+
+      if ( _via_img_metadata.hasOwnProperty(img_id) ) {
+        if ( _via_img_metadata[img_id].fileref ) {
+          show_message('Image ' + filename + ' already loaded. Skipping!');
+        } else {
+          _via_img_metadata[img_id].fileref = user_selected_images[i];
+          show_message('Regions already exist for file ' + filename + ' !');
+        }
+      } else {
+        _via_img_metadata[img_id] = new ImageMetadata(user_selected_images[i],
+                                                      filename,
+                                                      size);
+        _via_image_id_list.push(img_id);
+        _via_loaded_img_fn_list.push(filename);
+        _via_img_count += 1;
+        _via_reload_img_fn_list_table = true;
+      }
+    } else {
+      discarded_file_count += 1;
+    }
+  }
+
+  if ( _via_img_metadata ) {
+    var status_msg = 'Loaded ' + (_via_img_count - original_image_count) + ' images.';
+    if ( discarded_file_count ) {
+      status_msg += ' ( Discarded ' + discarded_file_count + ' non-image files! )';
+    }
+    show_message(status_msg);
+
+    if ( _via_image_index === -1 ) {
+      show_image(0);
+    } else {
+      show_image( original_image_count );
+    }
+    update_img_fn_list();
+    
+
+  } else {
+    show_message("Please upload some image files!");
+  }
+}
     });
     _via_current_image.src = img_reader.result;
   }, false);
@@ -5299,6 +5406,135 @@ function openInfoModal() {
 
   document.getElementById("infoModal").style.display = "block";
 }
+
+function show_grid_page(pageIndex) {
+  // cleanup old grid
+  var oldGrid = document.getElementById('grid_container');
+  if (oldGrid) oldGrid.remove();
+  var oldPag = document.getElementById('grid_pagination');
+  if (oldPag) oldPag.remove();
+
+  clear_image_display_area();
+  _via_grid_page = pageIndex;
+
+  var start = pageIndex * 16;
+  var end = Math.min(start + 16, _via_image_id_list.length);
+
+  var gridContainer = document.createElement("div");
+  gridContainer.id = "grid_container";
+
+  // fixed 4×4 grid
+  gridContainer.style.display = "grid";
+  gridContainer.style.gridTemplateColumns = "repeat(4, 1fr)";
+  gridContainer.style.gap = "10px";
+  gridContainer.style.padding = "10px";
+
+  for (let slot = 0; slot < 16; slot++) {
+  var cell = document.createElement("div");
+  cell.className = "grid-cell";
+
+  let imgIndex = start + slot; // use let here for proper scoping
+  if (imgIndex < end) {
+    var imgMeta = _via_img_metadata[_via_image_id_list[imgIndex]];
+    var imgEl = document.createElement("img");
+
+    // set image source
+    if (imgMeta.base64_img_data && imgMeta.base64_img_data !== '') {
+      imgEl.src = imgMeta.base64_img_data.indexOf('data:') === 0
+        ? imgMeta.base64_img_data
+        : 'data:image/jpeg;base64,' + imgMeta.base64_img_data;
+    } else if (imgMeta.fileref) {
+      if (typeof imgMeta.fileref === 'string') {
+        imgEl.src = imgMeta.fileref;
+      } else {
+        let objectUrl = URL.createObjectURL(imgMeta.fileref);
+        imgEl.src = objectUrl;
+        imgEl.onload = () => URL.revokeObjectURL(objectUrl);
+      }
+    } else if (imgMeta.filename) {
+      imgEl.src = imgMeta.filename;
+    }
+
+    imgEl.style.maxWidth = "100%";
+    imgEl.style.maxHeight = "100%";
+    imgEl.style.objectFit = "contain";
+    imgEl.style.cursor = "pointer";
+
+    imgEl.onclick = () => {
+      // switch back to single-image mode
+      _via_is_grid_view = false;
+      document.getElementById("grid_container")?.remove();
+      document.getElementById("grid_pagination")?.remove();
+      document.getElementById("canvas_panel").style.display = "block";
+
+      // restore arrows
+      show_image(imgIndex);
+    };
+
+    cell.appendChild(imgEl);
+  } else {
+    // empty placeholder
+    cell.style.background = "#222";
+  }
+
+  gridContainer.appendChild(cell);
+}
+
+
+  canvas_panel.parentNode.appendChild(gridContainer);
+
+  // pagination
+  var pagination = document.createElement("div");
+  pagination.id = "grid_pagination";
+  pagination.style.textAlign = "center";
+  pagination.style.marginTop = "10px";
+
+  if (pageIndex > 0) {
+    let prev = document.createElement("button");
+    prev.innerText = "Prev";
+    prev.onclick = () => show_grid_page(pageIndex - 1);
+    pagination.appendChild(prev);
+  }
+  if (end < _via_image_id_list.length) {
+    let next = document.createElement("button");
+    next.innerText = "Next";
+    next.onclick = () => show_grid_page(pageIndex + 1);
+    pagination.appendChild(next);
+  }
+
+  canvas_panel.parentNode.appendChild(pagination);
+}
+
+
+function toggle_grid_view() {
+  _via_is_grid_view = !_via_is_grid_view;
+
+  if (_via_is_grid_view) {
+    _via_last_single_image_index = _via_image_index; // remember
+    document.getElementById('canvas_panel').style.display = 'none';
+
+    // hide navigation arrows
+    document.getElementById('toolbar_prev_img').style.display = 'none';
+    document.getElementById('toolbar_next_img').style.display = 'none';
+
+    // build grid container
+    show_grid_page(0);
+  } else {
+    document.getElementById('canvas_panel').style.display = 'block';
+    document.getElementById('grid_container')?.remove();
+    document.getElementById('grid_pagination')?.remove();
+
+    // restore the last single image view
+    if (_via_last_single_image_index >= 0) {
+      show_image(_via_last_single_image_index);
+    }
+  }
+}
+
+
+
+
+
 
 function closeInfoModal() {
   document.getElementById("infoModal").style.display = "none";
