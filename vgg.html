@@ -1173,12 +1173,8 @@ input:checked + .slider:before {
 
 <!-- App Header -->
   <div class="app-header-row">
-<<<<<<< Updated upstream
 
-    <img src="C:\Users\Sankarshana\Downloads\logo.png" alt="App Logo" class="app-logo">
-=======
-    <img src="C:\Users\sowja\Downloads\logo.png" alt="App Logo" class="app-logo">
->>>>>>> Stashed changes
+    <img src="C:\Users\thanu\Downloads\logo.png" alt="App Logo" class="app-logo">
     <div class="app-title-block">
       <h1 class="app-title">SAMurai</h1>
     </div>
@@ -5845,45 +5841,151 @@ window.addEventListener("load", () => {
   const toggleBtn = document.getElementById("toggle-filter-panel");
   const fileList = document.getElementById("file-list");
 
-  // Collapse/Expand
-  toggleBtn.addEventListener("click", () => {
-    filterPanel.classList.toggle("collapsed");
-    const icon = toggleBtn.querySelector("i");
-    icon.className = filterPanel.classList.contains("collapsed")
-      ? "fas fa-chevron-right"
-      : "fas fa-chevron-left";
-  });
+  // Ensure VIA expected containers exist (minimal/safe)
+  if (!document.getElementById("image_panel")) {
+    const p = document.createElement("div");
+    p.id = "image_panel";
+    p.style.display = "none"; // keep it hidden if VIA doesn't need visible panel here
+    document.body.insertBefore(p, document.body.firstChild);
+  }
+  if (!document.getElementById("img_fn_list")) {
+    const li = document.createElement("div");
+    li.id = "img_fn_list";
+    li.style.display = "none";
+    document.body.insertBefore(li, document.body.firstChild);
+  }
 
-  // Hook into VIA’s existing upload process
-  const origStoreLocalImgRef = window.store_local_img_ref;
-  window.store_local_img_ref = function(event) {
-    // Call original VIA logic first
-    origStoreLocalImgRef.call(this, event);
-
-    // Then update our right-side file list
-    const files = event.target.files;
-    for (let i = 0; i < files.length; i++) {
-      const fileName = files[i].name;
-
-      // Skip duplicates
-      if (![...fileList.children].some(item => item.textContent === fileName)) {
-        const div = document.createElement("div");
-        div.className = "file-item";
-        div.textContent = fileName;
-
-        // Select on click
-        div.addEventListener("click", () => {
-          document.querySelectorAll("#file-list .file-item")
-            .forEach(el => el.classList.remove("selected"));
-          div.classList.add("selected");
-        });
-
-        fileList.appendChild(div);
+  // Collapse/Expand toggle logic (unchanged)
+  if (toggleBtn && filterPanel) {
+    toggleBtn.addEventListener("click", () => {
+      filterPanel.classList.toggle("collapsed");
+      const icon = toggleBtn.querySelector("i");
+      if (icon) {
+        icon.className = filterPanel.classList.contains("collapsed")
+          ? "fas fa-chevron-right"
+          : "fas fa-chevron-left";
       }
+    });
+  }
+
+  // Helper: attempt to show image by index using multiple fallbacks
+  function tryShowImageByIndex(index) {
+    try {
+      // 1) Preferred API name (if present)
+      if (typeof window._via_show_img === "function") {
+        window._via_show_img(index);
+        return true;
+      }
+
+      // 2) Alternative name observed in some builds
+      if (typeof window.show_image === "function") {
+        window.show_image(index);
+        return true;
+      }
+
+      // 3) Lower-level: set index + update UI (if available)
+      if (typeof window._via_image_index !== "undefined" &&
+          typeof window._via_update_ui_components === "function") {
+        window._via_image_index = index;
+        window._via_update_ui_components();
+        return true;
+      }
+
+      // 4) Last resort: simulate clicking VIA's left sidebar element
+      //    Try to find an element with data-id matching the image id
+      const idKey = window._via_image_id_list && window._via_image_id_list[index]
+                    ? window._via_image_id_list[index]
+                    : null;
+
+      if (idKey) {
+        // Look for imcell with data-id attribute (common VIA markup)
+        const leftItem = document.querySelector(`#img_fn_list .imcell[data-id='${idKey}']`);
+        if (leftItem) {
+          leftItem.click();
+          return true;
+        }
+
+        // If nothing exists, create a temporary, hidden imcell and click it
+        const leftList = document.getElementById('img_fn_list');
+        if (leftList) {
+          const temp = document.createElement('div');
+          temp.className = 'imcell';
+          temp.setAttribute('data-id', idKey);
+          temp.style.display = 'none';
+          leftList.appendChild(temp);
+          temp.click();
+          // keep the temp node in case VIA expects it later (or remove after small delay)
+          setTimeout(() => { try { leftList.removeChild(temp); } catch(e) {} }, 1000);
+          return true;
+        }
+      }
+    } catch (err) {
+      console.warn('tryShowImageByIndex failed:', err);
     }
-  };
+    return false;
+  }
+
+  // Build right panel from VIA metadata
+  function rebuildRightPanel() {
+    if (typeof window._via_img_metadata !== "object") return;
+
+    const keys = Object.keys(window._via_img_metadata);
+    // quick dedupe check
+    const oldChildren = Array.from(fileList.children).map(c => c.textContent);
+    if (oldChildren.join(',') === keys.map(k => window._via_img_metadata[k].filename).join(',')) {
+      // nothing changed
+      return;
+    }
+
+    fileList.innerHTML = "";
+    keys.forEach((k, idx) => {
+      const meta = window._via_img_metadata[k];
+      const div = document.createElement("div");
+      div.className = "file-item";
+      div.textContent = meta && meta.filename ? meta.filename : String(k);
+
+      div.addEventListener("click", () => {
+        // highlight in right panel
+        document.querySelectorAll("#file-list .file-item")
+          .forEach(el => el.classList.remove("selected"));
+        div.classList.add("selected");
+
+        // determine an index for VIA
+        let imgIndex = -1;
+
+        // prefer VIA's index list if available
+        if (Array.isArray(window._via_image_id_list)) {
+          imgIndex = window._via_image_id_list.indexOf(k);
+        }
+        // fallback: use same order as Object.keys(_via_img_metadata)
+        if (imgIndex === -1) {
+          const keysNow = Object.keys(window._via_img_metadata);
+          imgIndex = keysNow.indexOf(k);
+        }
+
+        if (imgIndex !== -1) {
+          const ok = tryShowImageByIndex(imgIndex);
+          if (!ok) {
+            console.warn('Unable to show image via known methods for index', imgIndex);
+          }
+        } else {
+          console.warn('Image id not found in VIA lists for key', k);
+        }
+      });
+
+      // append the item (this line must remain)
+      fileList.appendChild(div);
+    });
+  }
+
+  // Poll for changes and rebuild (500ms)
+  setInterval(rebuildRightPanel, 500);
+
+  // initial run
+  rebuildRightPanel();
 });
 </script>
+
 
 <script>
   let projects = [
