@@ -1063,15 +1063,22 @@ input:checked + .slider:before {
 /* =========================
    LIGHT THEME WORKSPACE
    ========================= */
+/* Light theme only for workspace (without breaking canvas) */
 .light-theme .middle_panel,
 .light-theme #canvas_panel,
 .light-theme #display_area,
-.light-theme #region_canvas,
-.light-theme #image_canvas,
 .light-theme .text_panel {
   background-color: white !important;
   color: black !important;
 }
+
+/* Do NOT force background on canvases */
+.light-theme #region_canvas,
+.light-theme #image_canvas {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
 
 
     </style>
@@ -1173,8 +1180,12 @@ input:checked + .slider:before {
 
 <!-- App Header -->
   <div class="app-header-row">
+<<<<<<< Updated upstream
 
     <img src="C:\Users\thanu\Downloads\logo.png" alt="App Logo" class="app-logo">
+=======
+    <img src="C:\Users\sowja\Downloads\logo.png" alt="App Logo" class="app-logo">
+>>>>>>> Stashed changes
     <div class="app-title-block">
       <h1 class="app-title">SAMurai</h1>
     </div>
