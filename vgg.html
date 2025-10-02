@@ -402,7 +402,7 @@ td {
       .top_panel {
       position: fixed;
       top: 0;
-      left: 50px;
+      left: 0px;
       display: block;
       font-size: medium;
       background-color: #000000;
@@ -468,6 +468,7 @@ td {
       display: block;
       }
 
+     
      #icon_strip {
   position: fixed;
   top: 7em; /* adjust depending on header height */
@@ -962,10 +963,116 @@ td {
 
 .ribbon-bar button.selected {
   background: #5b4b8a;   /* purple highlight */
-  border: 1px solid #9a85d6;
+  border: 1px solid #9f89dc;
   box-shadow: 0px 0px 6px rgba(154,133,214,0.8);
   font-weight: bold;
 }
+/* =========================
+   HEADER + NAVBAR + SIDEBAR
+   Always Dark (inverted L)
+   ========================= */
+.app-header-row,
+.top_panel,
+.navbar,
+#icon_strip {
+  background-color: #000 !important;
+  color: white !important;
+  border-color: #333 !important;
+}
+
+/* Ensure header/navbar span full width */
+.top_panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  z-index: 100;
+}
+
+/* Push middle panel below top header */
+.middle_panel {
+  margin-top: 6em;       /* adjust to match header height */
+  padding-left: 50px;    /* leave space for left strip */
+}
+
+/* Align sidebar under header */
+#icon_strip {
+  position: fixed;
+  top: 6em !important;   /* start below header */
+  bottom: 0;
+  width: 50px;
+  background-color: #000 !important;
+  border-right: 1px solid #333;
+}
+
+/* =========================
+   THEME TOGGLE SLIDER
+   ========================= */
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  padding-top: 25px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #888;
+  transition: .4s;
+  border-radius: 26px;
+  margin-top: 10px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #460a39;/* green ON */
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* Rounded look */
+.slider.round {
+  border-radius: 26px;
+}
+
+/* =========================
+   LIGHT THEME WORKSPACE
+   ========================= */
+.light-theme .middle_panel,
+.light-theme #canvas_panel,
+.light-theme #display_area,
+.light-theme #region_canvas,
+.light-theme #image_canvas,
+.light-theme .text_panel {
+  background-color: white !important;
+  color: black !important;
+}
+
 
     </style>
   </head>
@@ -1066,8 +1173,12 @@ td {
 
 <!-- App Header -->
   <div class="app-header-row">
+<<<<<<< Updated upstream
 
     <img src="C:\Users\Sankarshana\Downloads\logo.png" alt="App Logo" class="app-logo">
+=======
+    <img src="C:\Users\sowja\Downloads\logo.png" alt="App Logo" class="app-logo">
+>>>>>>> Stashed changes
     <div class="app-title-block">
       <h1 class="app-title">SAMurai</h1>
     </div>
@@ -1082,8 +1193,18 @@ td {
   <li><a onclick="showRibbon('shapes')">Region Shapes &#9662;</a></li>
   <li><a onclick="showRibbon('attributes')">Attributes &#9662;</a></li>
   <li><a onclick="showRibbon('help')">Help &#9662;</a></li>
-</ul>
 
+   
+
+
+  
+</ul>
+<li style="margin-left:auto; margin-right:20px;">
+  <label class="theme-switch">
+    <input type="checkbox" id="themeToggle">
+    <span class="slider round"></span>
+  </label>
+</li>
         </ul>
 
       </div> <!-- end of #navbar -->
@@ -5566,8 +5687,17 @@ function showRibbon(type) {
 
 
 
+document.addEventListener("DOMContentLoaded", function () {
+  const checkbox = document.getElementById("themeToggle");
 
-
+  checkbox.addEventListener("change", function () {
+    if (this.checked) {
+      document.body.classList.add("light-theme");
+    } else {
+      document.body.classList.remove("light-theme");
+    }
+  });
+});
 
 //
 // hooks for sub-modules
