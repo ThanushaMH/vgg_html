@@ -280,14 +280,14 @@ td {
 /* Modal overlay */
     .modal {
       display: none;
-      position: relative;
+      position: fixed;
       z-index: 20000;
       top: 0; left: 0;
       width: auto; height: auto;
       background: rgba(0,0,0,0.8);
       display: flex;
       justify-content: center;
-     /* align-items: center;*/
+      align-items: center;
     }
 
     /* Modal box (fullscreen width) */
@@ -936,8 +936,8 @@ td {
     </style>
   </head>
 
-  <body onload="_via_init(); openCreateModal();" onresize="_via_update_ui_components()">
-    <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" ...></svg>    <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <body onload=" openCreateModal();" onresize="_via_update_ui_components()">
+    <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
       <defs>
         <symbol id="shape_rectangle">
           <title>Rectangular region shape</title>
@@ -1032,11 +1032,7 @@ td {
 
 <!-- App Header -->
   <div class="app-header-row">
-<<<<<<< Updated upstream
-    <img src="C:\Users\Sankarshana\Downloads\logo.png" alt="App Logo" class="app-logo">
-=======
     <img src="C:\Users\thanu\Downloads\logo.png" alt="App Logo" class="app-logo">
->>>>>>> Stashed changes
     <div class="app-title-block">
       <h1 class="app-title">SAMurai</h1>
     </div>
@@ -1552,7 +1548,7 @@ function _via_init() {
 //
 // Handlers for top navigation bar
 //
-/*function show_home_panel() {
+function show_home_panel() {
   if (_via_current_image_loaded) {
     show_all_canvas();
     set_all_text_panel_display('none');
@@ -1562,7 +1558,7 @@ function _via_init() {
     document.getElementById('via_start_info_panel').innerHTML = start_info;
     document.getElementById('via_start_info_panel').style.display = 'block';
   }
-}*/
+}
 function sel_local_images() {
   // source: https://developer.mozilla.org/en-US/docs/Using_files_from_web_applications
   if (invisible_file_input) {
