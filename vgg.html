@@ -371,9 +371,10 @@ td {
 
       .navbar {
       display: inline-block;
+      
       border-bottom: 1.5px solid whitesmoke;
       width:100%;
-      left: px;
+      
       }
       .navbar ul {
       display: flex;
@@ -381,6 +382,7 @@ td {
       overflow: hidden;
       padding: 0;
       margin: 0;
+      margin-left: 25px;
       }
       .navbar li {
       float: left;
@@ -425,20 +427,9 @@ td {
       }
 
      
-     #icon_strip {
-  position: fixed;
-  top: 7em; /* adjust depending on header height */
-  left: 0;
-  width: 50px;
-  background-color: #111;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between; /* distribute icons evenly */
-  align-items: center;
-  padding: 0.5em 0;
-  height: calc(100% - 7em); /* fills below header */
-  z-index: 20;
-}
+     /*#icon_strip {
+  
+}*/
 
 #icon_strip a {
   color: white;
@@ -904,7 +895,7 @@ td {
 .ribbon-bar {
   display: none;              /* hidden by default */
   background: #2f2b3a;
-  padding: 6px 12px;
+  padding: 6px 60px;
   border-top: 1px solid #444;
   gap: 10px;
 }
@@ -933,17 +924,18 @@ td {
    HEADER + NAVBAR + SIDEBAR
    Always Dark (inverted L)
    ========================= */
-.app-header-row,
+/*.app-header-row,
 .top_panel,
 .navbar,
 #icon_strip {
   background-color: #000 !important;
   color: white !important;
   border-color: #333 !important;
-}
+}*/
 
 /* Ensure header/navbar span full width */
 .top_panel {
+  background-color: #000 !important;
   position: fixed;
   top: 0;
   left: 0;
@@ -959,12 +951,23 @@ td {
 
 /* Align sidebar under header */
 #icon_strip {
+  background-color:#2f2b3a;
+  color: white !important;
+  border-color:white !important;
   position: fixed;
-  top: 6em !important;   /* start below header */
+  /* top: 6.5em !important;   start below header */
   bottom: 0;
   width: 50px;
-  background-color: #000 !important;
-  border-right: 1px solid #333;
+  border-right: 1px solid white; 
+  left: 0;
+  display: flex;
+  flex-wrap: unset;
+  flex-direction: column;
+  justify-content: space-between;   
+  align-items: center;
+  /*padding: 1.5em 0px ;*/
+  height: calc(100% - 4em); 
+  z-index: 20000;
 }
 
 /* =========================
@@ -1086,7 +1089,6 @@ input:checked + .slider:before {
    <!-- Left vertical icon strip -->
 <div id="icon_strip">
 
-  
   <!-- Zoom -->
   <a id="toolbar_zoom_out" onclick="zoom_out()" title="Zoom Out"><i class="fas fa-search-minus"></i></a>
   <a id="toolbar_zoom_in" onclick="zoom_in()" title="Zoom In"><i class="fas fa-search-plus"></i></a>
@@ -1142,7 +1144,7 @@ input:checked + .slider:before {
 
 <!-- App Header -->
   <div class="app-header-row">
-    <img src="C:\Users\sowja\Downloads\logo.png" alt="App Logo" class="app-logo">
+    <img src="C:\Users\Sankarshana\Downloads\logo.png" alt="App Logo" class="app-logo">
     <div class="app-title-block">
       <h1 class="app-title">SAMurai</h1>
     </div>
