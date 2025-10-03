@@ -554,7 +554,7 @@ td {
 #grid_container .grid-cell {
   /*aspect-ratio: 1 / 1;*/
   background: #111;
-  display: grid;
+  display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
@@ -565,6 +565,12 @@ td {
   max-height: 100%;
   object-fit: contain; /* preserve aspect ratio inside cell */
 }
+
+.grid-cell.highlight {
+  border: 3px solid #00aaff;
+  box-shadow: 0 0 8px #00aaff;
+}
+
 
 
       #fileinfo {
@@ -1180,12 +1186,8 @@ input:checked + .slider:before {
 
 <!-- App Header -->
   <div class="app-header-row">
-<<<<<<< Updated upstream
+    <img src="C:\Users\Sankarshana\Downloads\logo.png" alt="App Logo" class="app-logo">
 
-    <img src="C:\Users\thanu\Downloads\logo.png" alt="App Logo" class="app-logo">
-=======
-    <img src="C:\Users\sowja\Downloads\logo.png" alt="App Logo" class="app-logo">
->>>>>>> Stashed changes
     <div class="app-title-block">
       <h1 class="app-title">SAMurai</h1>
     </div>
@@ -1865,9 +1867,9 @@ function store_local_img_ref(event) {
 update_img_fn_list();
 
 
-if (_via_is_grid_view) {
+/*if (_via_is_grid_view) {
   show_grid_page(_via_grid_page); // refresh grid with new images
-}
+}*/
 
 
   } else {
@@ -5445,22 +5447,45 @@ function img_loading_spinbar(show) {
 }
 
 function update_img_fn_list() {
-  var regex = document.getElementById('img_fn_list_regex').value;
-  if ( regex === '' || regex === null ) {
-    _via_loaded_img_fn_list_table_html = [];
-    _via_loaded_img_fn_list_file_index = [];
-    _via_loaded_img_fn_list_table_html.push('<ul>');
-    for ( var i=0; i < _via_loaded_img_fn_list.length; ++i ) {
-      _via_loaded_img_fn_list_table_html.push( img_fn_list_ith_entry_html(i) );
-      _via_loaded_img_fn_list_file_index.push(i);
-    }
-    _via_loaded_img_fn_list_table_html.push('</ul>');
-  } else {
-    img_fn_list_generate_html(regex);
+  var fileList = document.getElementById('file-list');
+  fileList.innerHTML = '';
+
+  for (let i = 0; i < _via_image_id_list.length; i++) {
+    let img_id = _via_image_id_list[i];
+    let filename = _via_img_metadata[img_id].filename;
+
+    let div = document.createElement('div');
+    div.className = 'file-item';
+    div.textContent = filename;
+
+    div.addEventListener('click', function () {
+      if (_via_is_grid_view) {
+        // --- GRID VIEW MODE ---
+        // Compute which page the image is on
+        let pageIndex = Math.floor(i / 16);
+        if (pageIndex !== _via_grid_page) {
+          _via_grid_page = pageIndex;
+          show_grid_page(_via_grid_page);
+        }
+
+        // highlight the correct cell
+        let cells = document.querySelectorAll('#grid_container .grid-cell');
+        cells.forEach(c => c.classList.remove('highlight'));
+        let cellIndex = i % 16;
+        if (cells[cellIndex]) {
+          cells[cellIndex].classList.add('highlight');
+          cells[cellIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } else {
+        // --- REGULAR MODE ---
+        show_image(i);
+      }
+    });
+
+    fileList.appendChild(div);
   }
-  img_fn_list.innerHTML = _via_loaded_img_fn_list_table_html.join('');
-  img_fn_list_scroll_to_current_file();
 }
+
 
 function img_fn_list_onregex() {
   img_fn_list_generate_html( document.getElementById('img_fn_list_regex').value );
@@ -5471,17 +5496,59 @@ function img_fn_list_onregex() {
 function img_fn_list_ith_entry_html(i) {
   var htmli = '';
   var filename = _via_loaded_img_fn_list[i];
-  if ( i === _via_image_index ) {
-    // highlight the current entry
-    htmli += '<li id="flist'+i+'" style="cursor: default;">';
+
+  // When showing file list, if current index and not in grid view, highlight the entry
+  if ( i === _via_image_index && !_via_is_grid_view ) {
+    htmli += '<li id="flist' + i + '" style="cursor: default;">';
     htmli += '<b>[' + (i+1) + '] ' + filename + '</b>';
   } else {
-    htmli += '<li id="flist'+i+'" onclick="jump_to_image(' + (i) + ')">';
+    // If we are in grid view, clicking should highlight in grid; otherwise open image
+    if ( _via_is_grid_view ) {
+      htmli += '<li id="flist' + i + '" onclick="highlight_grid_image(' + i + ')">';
+    } else {
+      htmli += '<li id="flist' + i + '" onclick="jump_to_image(' + i + ')">';
+    }
     htmli += '[' + (i+1) + '] ' + filename;
   }
+
   htmli += '</li>';
   return htmli;
 }
+
+function highlight_grid_image(img_index) {
+  // ensure we are in grid mode
+  if (!_via_is_grid_view) {
+    // remember current single image to restore later
+    _via_last_single_image_index = _via_image_index;
+    _via_is_grid_view = true;
+    // hide the canvas panel, hide arrows if present
+    if (document.getElementById('canvas_panel')) document.getElementById('canvas_panel').style.display = 'none';
+    if (document.getElementById('toolbar_prev_img')) document.getElementById('toolbar_prev_img').style.display = 'none';
+    if (document.getElementById('toolbar_next_img')) document.getElementById('toolbar_next_img').style.display = 'none';
+  }
+
+  var pageIndex = Math.floor(img_index / 16);
+  _via_grid_page = pageIndex;
+
+  // build/show that page
+  show_grid_page(pageIndex);
+
+  // highlight after DOM is rendered
+  setTimeout(function() {
+    var gridCells = document.querySelectorAll('#grid_container .grid-cell');
+    gridCells.forEach(function(c) { c.classList.remove('highlight'); });
+
+    var slotId = 'grid_img_' + img_index;
+    var cell = document.getElementById(slotId);
+    if (cell) {
+      cell.classList.add('highlight');
+      // ensure visible
+      try { cell.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e) {}
+    }
+  }, 60);
+}
+
+
 
 function img_fn_list_generate_html(regex) {
   _via_loaded_img_fn_list_table_html = [];
@@ -5536,12 +5603,13 @@ function openInfoModal() {
 }
 
 function show_grid_page(pageIndex) {
-  // cleanup old grid
+  // remove previous grid/pagination if present
   var oldGrid = document.getElementById('grid_container');
-  if (oldGrid) oldGrid.remove();
+  if (oldGrid && oldGrid.parentNode) oldGrid.parentNode.removeChild(oldGrid);
   var oldPag = document.getElementById('grid_pagination');
-  if (oldPag) oldPag.remove();
+  if (oldPag && oldPag.parentNode) oldPag.parentNode.removeChild(oldPag);
 
+  // hide canvas panels (we will show grid in their place)
   clear_image_display_area();
   _via_grid_page = pageIndex;
 
@@ -5551,87 +5619,104 @@ function show_grid_page(pageIndex) {
   var gridContainer = document.createElement("div");
   gridContainer.id = "grid_container";
 
-  // fixed 4×4 grid
+  // Grid styling (you can move this to CSS)
   gridContainer.style.display = "grid";
   gridContainer.style.gridTemplateColumns = "repeat(4, 1fr)";
   gridContainer.style.gap = "10px";
   gridContainer.style.padding = "10px";
+  gridContainer.style.boxSizing = "border-box";
 
   for (let slot = 0; slot < 16; slot++) {
-  var cell = document.createElement("div");
-  cell.className = "grid-cell";
+    // IMPORTANT: use let to capture the correct index in closures
+    let imgIndex = start + slot;
+    var cell = document.createElement("div");
+    cell.className = "grid-cell";
+    cell.id = "grid_img_" + imgIndex; // stable id used for highlighting
 
-  let imgIndex = start + slot; // use let here for proper scoping
-  if (imgIndex < end) {
-    var imgMeta = _via_img_metadata[_via_image_id_list[imgIndex]];
-    var imgEl = document.createElement("img");
+    // If there is an image for this slot, create thumbnail; else placeholder
+    if (imgIndex < _via_image_id_list.length) {
+      var imgMeta = _via_img_metadata[_via_image_id_list[imgIndex]];
+      var imgEl = document.createElement("img");
 
-    // set image source
-    if (imgMeta.base64_img_data && imgMeta.base64_img_data !== '') {
-      imgEl.src = imgMeta.base64_img_data.indexOf('data:') === 0
-        ? imgMeta.base64_img_data
-        : 'data:image/jpeg;base64,' + imgMeta.base64_img_data;
-    } else if (imgMeta.fileref) {
-      if (typeof imgMeta.fileref === 'string') {
-        imgEl.src = imgMeta.fileref;
+      // Robust src selection: base64, File object, or filename/URL
+      if (imgMeta.base64_img_data && imgMeta.base64_img_data !== '') {
+        imgEl.src = (imgMeta.base64_img_data.indexOf('data:') === 0) ?
+                     imgMeta.base64_img_data :
+                     'data:image/jpeg;base64,' + imgMeta.base64_img_data;
+      } else if (imgMeta.fileref) {
+        if (typeof imgMeta.fileref === 'string') {
+          imgEl.src = imgMeta.fileref;
+        } else {
+          // fileref is a File -> create object URL
+          let objectUrl = URL.createObjectURL(imgMeta.fileref);
+          imgEl.src = objectUrl;
+          imgEl.onload = function() { try { URL.revokeObjectURL(objectUrl); } catch(e) {} };
+        }
+      } else if (imgMeta.filename) {
+        imgEl.src = imgMeta.filename; // fallback (server URL)
       } else {
-        let objectUrl = URL.createObjectURL(imgMeta.fileref);
-        imgEl.src = objectUrl;
-        imgEl.onload = () => URL.revokeObjectURL(objectUrl);
+        // no source available; show empty placeholder
+        imgEl = null;
       }
-    } else if (imgMeta.filename) {
-      imgEl.src = imgMeta.filename;
+
+      if (imgEl) {
+        imgEl.style.maxWidth = "100%";
+        imgEl.style.maxHeight = "100%";
+        imgEl.style.objectFit = "contain";
+        imgEl.style.cursor = "pointer";
+
+        // click a thumbnail -> exit grid view and open single image
+        imgEl.addEventListener('click', function() {
+          _via_is_grid_view = false;
+          var g = document.getElementById('grid_container');
+          if (g && g.parentNode) g.parentNode.removeChild(g);
+          var p = document.getElementById('grid_pagination');
+          if (p && p.parentNode) p.parentNode.removeChild(p);
+          // restore canvas panel and arrows will be handled by show_image()
+          document.getElementById('canvas_panel').style.display = "block";
+          show_image(imgIndex);
+        });
+
+        cell.appendChild(imgEl);
+      } else {
+        // no imgEl, keep empty placeholder
+        cell.style.background = "#222";
+      }
+    } else {
+      // empty placeholder cell (keeps fixed positions)
+      cell.style.background = "#222";
     }
 
-    imgEl.style.maxWidth = "100%";
-    imgEl.style.maxHeight = "100%";
-    imgEl.style.objectFit = "contain";
-    imgEl.style.cursor = "pointer";
-
-    imgEl.onclick = () => {
-      // switch back to single-image mode
-      _via_is_grid_view = false;
-      document.getElementById("grid_container")?.remove();
-      document.getElementById("grid_pagination")?.remove();
-      document.getElementById("canvas_panel").style.display = "block";
-
-      // restore arrows
-      show_image(imgIndex);
-    };
-
-    cell.appendChild(imgEl);
-  } else {
-    // empty placeholder
-    cell.style.background = "#222";
+    gridContainer.appendChild(cell);
   }
 
-  gridContainer.appendChild(cell);
-}
-
-
-  canvas_panel.parentNode.appendChild(gridContainer);
+  // append the grid to the same parent that contains canvas_panel
+  var parentContainer = canvas_panel && canvas_panel.parentNode ? canvas_panel.parentNode : document.body;
+  parentContainer.appendChild(gridContainer);
 
   // pagination
-  var pagination = document.createElement("div");
-  pagination.id = "grid_pagination";
-  pagination.style.textAlign = "center";
-  pagination.style.marginTop = "10px";
+  var pagination = document.createElement('div');
+  pagination.id = 'grid_pagination';
+  pagination.style.textAlign = 'center';
+  pagination.style.marginTop = '10px';
 
   if (pageIndex > 0) {
-    let prev = document.createElement("button");
-    prev.innerText = "Prev";
-    prev.onclick = () => show_grid_page(pageIndex - 1);
-    pagination.appendChild(prev);
-  }
-  if (end < _via_image_id_list.length) {
-    let next = document.createElement("button");
-    next.innerText = "Next";
-    next.onclick = () => show_grid_page(pageIndex + 1);
-    pagination.appendChild(next);
+    var prevBtn = document.createElement('button');
+    prevBtn.innerText = 'Prev';
+    prevBtn.onclick = function() { show_grid_page(pageIndex - 1); };
+    pagination.appendChild(prevBtn);
   }
 
-  canvas_panel.parentNode.appendChild(pagination);
+  if (end < _via_image_id_list.length) {
+    var nextBtn = document.createElement('button');
+    nextBtn.innerText = 'Next';
+    nextBtn.onclick = function() { show_grid_page(pageIndex + 1); };
+    pagination.appendChild(nextBtn);
+  }
+
+  parentContainer.appendChild(pagination);
 }
+
 
 
 function toggle_grid_view() {
@@ -5647,6 +5732,8 @@ function toggle_grid_view() {
 
     // build grid container
     show_grid_page(0);
+    update_img_fn_list(); // rebuild file list so list items call highlight_grid_image(...) now
+
   } else {
     document.getElementById('canvas_panel').style.display = 'block';
     document.getElementById('grid_container')?.remove();
@@ -5656,6 +5743,7 @@ function toggle_grid_view() {
     if (_via_last_single_image_index >= 0) {
       show_image(_via_last_single_image_index);
     }
+    update_img_fn_list(); // rebuild so list items call jump_to_image(...)
   }
 }
 
