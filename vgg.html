@@ -920,6 +920,85 @@ td {
   box-shadow: 0px 0px 6px rgba(154,133,214,0.8);
   font-weight: bold;
 }
+/* === Attributes Panel === */
+.attributes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: #2f2b3a;
+  padding: 12px 60px;
+  color: white;
+  font-family: sans-serif;
+}
+
+.attribute-header {
+  display: flex;
+  gap: 10px;
+}
+
+.attribute-header button {
+  background-color: #3c374a;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.attribute-header button:hover {
+  background-color: #56506d;
+}
+
+.attribute-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.attribute-controls input,
+.attribute-controls select {
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #666;
+  background: #1f1f1f;
+  color: white;
+}
+
+.attribute-controls button {
+  background-color: #3c374a;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.attribute-controls button:hover {
+  background-color: #56506d;
+}
+
+.attr-table {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  background-color: #1f1f1f;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.attr-table label {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+
+.attr-table input,
+.attr-table select {
+  padding: 4px 6px;
+  border: 1px solid #555;
+  background-color: #2c2c2c;
+  color: white;
+  border-radius: 4px;
+}
+
 /* =========================
    HEADER + NAVBAR + SIDEBAR
    Always Dark (inverted L)
@@ -1144,7 +1223,7 @@ input:checked + .slider:before {
 
 <!-- App Header -->
   <div class="app-header-row">
-    <img src="C:\Users\Sankarshana\Downloads\logo.png" alt="App Logo" class="app-logo">
+    <img src="C:\Users\thanu\Downloads\logo.png" alt="App Logo" class="app-logo">
     <div class="app-title-block">
       <h1 class="app-title">SAMurai</h1>
     </div>
@@ -1178,6 +1257,16 @@ input:checked + .slider:before {
 <div id="ribbon_bar" class="ribbon-bar">
 
 
+</div>
+<div id="attr_def_panel" class="attributes-container" style="display:none;">
+  <div class="attribute-controls">
+    <input id="attributeNameInput" placeholder="Attribute Name" />
+    <button onclick="addAttribute()">+</button>
+    <button onclick="confirmAndRemove()">−</button>
+    <select id="attrSelect"></select>
+  </div>
+
+  <div id="attributeTableContainer"></div>
 </div>
 
     
@@ -1359,12 +1448,12 @@ input:checked + .slider:before {
     </div>
 
     <!-- region and file attributes input panel -->
-    <div id="attributes_panel">
+    <!-- <div id="attributes_panel">
       <div id="attributes_panel_toolbar">
         <div onclick="toggle_attributes_input_panel()" class="attributes_panel_button">&times;</div>
       </div>
       <table id="attributes_panel_table"></table>
-    </div>
+    </div> -->
 
     <!-- to show status messages -->
     <div id="message_panel"></div>
@@ -1622,9 +1711,10 @@ const RIBBONS = {
     <button onclick="show_about_panel()">About</button>
   `,
   attributes: `
-    <button onclick="toggle_attributes_input_panel('region')">Region Attributes</button>
-    <button onclick="toggle_attributes_input_panel('file')">File Attributes</button>
+    <button onclick="toggleAttrType('region')">Region Attributes</button>
+    <button onclick="toggleAttrType('file')">File Attributes</button>
   `
+
 };
 
 //
@@ -5723,11 +5813,14 @@ window.onclick = function(event) {
 
 function showRibbon(type) {
   const ribbon = document.getElementById("ribbon_bar");
+  const attrPanel = document.getElementById("attr_def_panel");
 
   // If same ribbon is already open, toggle off
   if (ribbon.style.display === "flex" && ribbon.dataset.type === type) {
     ribbon.style.display = "none";
     ribbon.dataset.type = "";
+    // Hide attribute panel when ribbon is closed
+    if (attrPanel) attrPanel.style.display = "none";
     return;
   }
 
@@ -5735,6 +5828,11 @@ function showRibbon(type) {
   ribbon.style.display = "flex";
   ribbon.dataset.type = type;
   ribbon.innerHTML = RIBBONS[type] || "<span style='color:gray'>No options available</span>";
+
+  // 🔹 Hide attribute panel when switching to any other ribbon
+  if (type !== "attributes" && attrPanel) {
+    attrPanel.style.display = "none";
+  }
 }
 
 
@@ -6130,5 +6228,110 @@ window.addEventListener("load", () => {
     closeCreateModal();
   }
 </script>
+<script>
+let isRegion = true;
+let regionAttributes = {};
+let fileAttributes = {};
+let currentAttr = "";
+
+function toggleAttrType(type) {
+  const panel = document.getElementById("attr_def_panel");
+
+  // If same button clicked again → close the panel
+  if (panel.style.display === "block" && isRegion === (type === "region")) {
+    panel.style.display = "none";
+    return;
+  }
+
+  // Otherwise show the panel and switch type
+  isRegion = (type === "region");
+  panel.style.display = "block";
+  currentAttr = "";
+  updateAttrSelect();
+  renderAttrTable();
+}
+
+
+function getCurrentStore() {
+  return isRegion ? regionAttributes : fileAttributes;
+}
+
+function addAttribute() {
+  const name = document.getElementById("attributeNameInput").value.trim();
+  if (!name) return;
+
+  const store = getCurrentStore();
+  if (store[name]) return alert("Attribute already exists!");
+
+  store[name] = { desc: "", def: "", type: "text" };
+  currentAttr = name;
+  updateAttrSelect();
+  renderAttrTable();
+  document.getElementById("attributeNameInput").value = "";
+}
+
+function confirmAndRemove() {
+  const select = document.getElementById("attrSelect");
+  const attr = select.value;
+  if (!attr) return;
+
+  if (confirm(`Are you sure you want to delete "${attr}"?`)) {
+    const store = getCurrentStore();
+    delete store[attr];
+    updateAttrSelect();
+    renderAttrTable();
+  }
+}
+
+function updateAttrSelect() {
+  const select = document.getElementById("attrSelect");
+  const store = getCurrentStore();
+  select.innerHTML = "";
+  Object.keys(store).forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
+  });
+  if (Object.keys(store).length) select.value = currentAttr || Object.keys(store)[0];
+  currentAttr = select.value;
+}
+
+document.getElementById("attrSelect").addEventListener("change", (e) => {
+  currentAttr = e.target.value;
+  renderAttrTable();
+});
+
+function renderAttrTable() {
+  const container = document.getElementById("attributeTableContainer");
+  container.innerHTML = "";
+  const store = getCurrentStore();
+  if (!currentAttr || !store[currentAttr]) return;
+
+  const attr = store[currentAttr];
+  container.innerHTML = `
+    <div class="attr-table">
+      <label>Name:<input type="text" value="${currentAttr}" disabled></label>
+      <label>Desc.:<input type="text" value="${attr.desc}" oninput="updateAttrField('desc', this.value)"></label>
+      <label>Def.:<input type="text" value="${attr.def}" oninput="updateAttrField('def', this.value)"></label>
+      <label>Type:
+        <select onchange="updateAttrField('type', this.value)">
+          <option value="text"${attr.type==='text'?' selected':''}>Text</option>
+          <option value="checkbox"${attr.type==='checkbox'?' selected':''}>Checkbox</option>
+          <option value="radio"${attr.type==='radio'?' selected':''}>Radio</option>
+          <option value="image"${attr.type==='image'?' selected':''}>Image</option>
+          <option value="dropdown"${attr.type==='dropdown'?' selected':''}>Dropdown</option>
+        </select>
+      </label>
+    </div>`;
+}
+
+function updateAttrField(field, value) {
+  const store = getCurrentStore();
+  if (store[currentAttr]) store[currentAttr][field] = value;
+}
+</script>
+
+
   </body>
 </html>
