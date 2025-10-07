@@ -252,7 +252,7 @@ td {
       color: #f0f0f0;
       border-radius: 0;
       width: 100%;
-      height: 95%;         /* nearly full height */
+      height:65%;         /* nearly full height */
       margin: 0;
       display: flex;
       flex-direction: column;
@@ -1225,7 +1225,7 @@ input:checked + .slider:before {
 
 <!-- App Header -->
   <div class="app-header-row">
-    <img src="C:\Users\Sankarshana\Downloads\logo.png" alt="App Logo" class="app-logo">
+    <img src="C:\Users\thanu\Downloads\logo.png" alt="App Logo" class="app-logo">
     <div class="app-title-block">
       <h1 class="app-title">SAMurai</h1>
     </div>
@@ -1694,12 +1694,12 @@ const RIBBONS = {
     <button onclick="toggle_img_fn_list_visibility()">List Images</button>
   `,
   shapes: `
-    <button onclick="_via_current_shape=VIA_REGION_SHAPE.RECT">Rectangle</button>
-    <button onclick="_via_current_shape=VIA_REGION_SHAPE.CIRCLE">Circle</button>
-    <button onclick="_via_current_shape=VIA_REGION_SHAPE.ELLIPSE">Ellipse</button>
-    <button onclick="_via_current_shape=VIA_REGION_SHAPE.POLYGON">Polygon</button>
-    <button onclick="_via_current_shape=VIA_REGION_SHAPE.POINT">Point</button>
-    <button onclick="_via_current_shape=VIA_REGION_SHAPE.POLYLINE">Polyline</button>
+    <button onclick="_via_current_shape=VIA_REGION_SHAPE.RECT">▭ </button>
+    <button onclick="_via_current_shape=VIA_REGION_SHAPE.CIRCLE">◯ </button>
+    <button onclick="_via_current_shape=VIA_REGION_SHAPE.ELLIPSE">⬭ </button>
+    <button onclick="_via_current_shape=VIA_REGION_SHAPE.POLYGON">⬠ </button>
+    <button onclick="_via_current_shape=VIA_REGION_SHAPE.POINT">• </button>
+    <button onclick="_via_current_shape=VIA_REGION_SHAPE.POLYLINE">⤿ </button>
   `,
   annotation: `
     <button onclick="show_annotation_data()">View annotations</button>
@@ -6145,9 +6145,7 @@ window.addEventListener("load", () => {
 
 <script>
   let projects = [
-    {id: 1, name: "Demo A", desc: "Sample project A", by: "Alice", on: "2025-09-30", images: 5},
-    {id: 2, name: "Demo B", desc: "Sample project B", by: "Bob", on: "2025-09-29", images: 3}
-  ];
+     ];
   let selectedId = null;
   let mode = "create";
 
